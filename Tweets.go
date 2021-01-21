@@ -1,9 +1,7 @@
 package twitter
 
 import (
-	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
@@ -165,23 +163,11 @@ type Include struct {
 }
 
 type Meta struct {
-	Count         int    `json:"count"`
-	NewestID      string `json:"newest_id"`
-	OldestID      string `json:"oldest_id"`
-	NextToken     string `json:"next_token"`
-	PreviousToken string `json:"previous_token"`
-}
-
-type Enums []string
-
-func (enums *Enums) MarshalJSON() ([]byte, error) {
-	if enums == nil {
-		return nil, nil
-	}
-
-	_enums := strings.Join(*enums, ",")
-
-	return json.Marshal(_enums)
+	ResultCount   int     `json:"result_count"`
+	NewestID      *string `json:"newest_id"`
+	OldestID      *string `json:"oldest_id"`
+	NextToken     *string `json:"next_token"`
+	PreviousToken *string `json:"previous_token"`
 }
 
 type Exclude string
@@ -287,71 +273,188 @@ const (
 	UserFieldWithheld        UserField = "withheld"
 )
 
-type Excludes Enums
-type Expansions Enums
-type MediaFields Enums
-type PlaceFields Enums
-type PollFields Enums
-type TweetFields Enums
-type UserFields Enums
-
-type Time struct {
-	time time.Time
+type GetTweetsCall struct {
+	service         *Service
+	userID          int64
+	EndTime         *time.Time `tw:"end_time"`
+	Exclude         *[]string  `tw:"exclude"`
+	Expansions      *[]string  `tw:"expansions"`
+	MaxResults      *int       `tw:"max_results"`
+	MediaFields     *[]string  `tw:"media.fields"`
+	PaginationToken *string    `tw:"pagination_token"`
+	PlaceFields     *[]string  `tw:"place.fields"`
+	PollFields      *[]string  `tw:"poll.fields"`
+	SinceID         *string    `tw:"since_id"`
+	StartTime       *time.Time `tw:"start_time"`
+	TweetFields     *[]string  `tw:"tweet.fields"`
+	UntilID         *string    `tw:"until_id"`
+	UserFields      *[]string  `tw:"user.fields"`
 }
 
-func (t *Time) MarshalJSON() ([]byte, error) {
-	if t == nil {
-		return nil, nil
+func (service *Service) NewGetTweetsCall(userID int64) *GetTweetsCall {
+	return &GetTweetsCall{
+		service: service,
+		userID:  userID,
 	}
-
-	return json.Marshal(t.time.Format(time.RFC3339))
 }
 
-type GetTweetsParams struct {
-	UserID          int64
-	EndTime         *Time        `json:"end_time"`
-	Exclude         *Excludes    `json:"exclude"`
-	Expansions      *Expansions  `json:"expansions"`
-	MaxResults      *int         `json:"max_results"`
-	MediaFields     *MediaFields `json:"media.fields"`
-	PaginationToken *string      `json:"pagination_token"`
-	PlaceFields     *PlaceFields `json:"place.fields"`
-	PollFields      *PollFields  `json:"poll.fields"`
-	SinceID         *string      `json:"since_id"`
-	StartTime       *Time        `json:"start_time"`
-	TweetFields     *TweetFields `json:"tweet.fields"`
-	UntilID         *string      `json:"until_id"`
-	UserFields      *UserFields  `json:"user.fields"`
+func (call *GetTweetsCall) SetEndTime(endTime time.Time) *GetTweetsCall {
+	(*call).EndTime = &endTime
+
+	return call
 }
 
-func (service *Service) GetTweets(params *GetTweetsParams) (*[]Tweet, *errortools.Error) {
-	top := 100
-	skip := 0
+func (call *GetTweetsCall) SetExclude(excludes ...Exclude) *GetTweetsCall {
+	elems := []string{}
 
+	for _, elem := range excludes {
+		elems = append(elems, string(elem))
+	}
+	(*call).Exclude = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetExpansions(expansions ...Expansion) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range expansions {
+		elems = append(elems, string(elem))
+	}
+	(*call).Expansions = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetMaxResults(maxResults int) *GetTweetsCall {
+	(*call).MaxResults = &maxResults
+
+	return call
+}
+
+func (call *GetTweetsCall) SetMediaFields(mediaFields ...MediaField) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range mediaFields {
+		elems = append(elems, string(elem))
+	}
+	(*call).MediaFields = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetPaginationToken(paginationToken string) *GetTweetsCall {
+	(*call).PaginationToken = &paginationToken
+
+	return call
+}
+
+func (call *GetTweetsCall) SetPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range placeFields {
+		elems = append(elems, string(elem))
+	}
+	(*call).PlaceFields = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetPollFields(pollFields ...PollField) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range pollFields {
+		elems = append(elems, string(elem))
+	}
+	(*call).PollFields = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetSinceID(sinceID string) *GetTweetsCall {
+	(*call).SinceID = &sinceID
+
+	return call
+}
+
+func (call *GetTweetsCall) SetStartTime(startTime time.Time) *GetTweetsCall {
+	(*call).StartTime = &startTime
+
+	return call
+}
+
+func (call *GetTweetsCall) SetTweetFields(tweetFields ...TweetField) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range tweetFields {
+		elems = append(elems, string(elem))
+	}
+	(*call).TweetFields = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetUntilID(untilID string) *GetTweetsCall {
+	(*call).UntilID = &untilID
+
+	return call
+}
+
+func (call *GetTweetsCall) SetUserFields(userFields ...UserField) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range userFields {
+		elems = append(elems, string(elem))
+	}
+	(*call).UserFields = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) Do() (*[]Tweet, *errortools.Error) {
 	tweets := []Tweet{}
 
 	rowCount := 0
 
-	for skip == 0 || rowCount > 0 {
-		urlPath := fmt.Sprintf("users/%v/tweets", params.UserID)
-
-		tweetsResponse := TweetsResponse{}
-		requestConfig := oauth2.RequestConfig{
-			URL:           service.url(urlPath),
-			ResponseModel: &tweetsResponse,
-		}
-		_, _, e := service.get(&requestConfig)
+	for true {
+		params, e := call.service.urlParams(call)
 		if e != nil {
 			return nil, e
 		}
 
-		rowCount = len(*tweetsResponse.Data)
+		urlPath := fmt.Sprintf("users/%v/tweets%s", call.userID, *params)
+		fmt.Println(urlPath)
 
-		if rowCount > 0 {
-			tweets = append(tweets, *tweetsResponse.Data...)
+		tweetsResponse := TweetsResponse{}
+		requestConfig := oauth2.RequestConfig{
+			URL:           call.service.url(urlPath),
+			ResponseModel: &tweetsResponse,
+		}
+		_, _, e = call.service.get(&requestConfig)
+		if e != nil {
+			return nil, e
 		}
 
-		skip += top
+		if tweetsResponse.Data == nil {
+			break
+		}
+
+		rowCountCall := len(*tweetsResponse.Data)
+
+		if rowCountCall > 0 {
+			tweets = append(tweets, *tweetsResponse.Data...)
+			rowCount += rowCountCall
+		}
+
+		if tweetsResponse.Meta == nil {
+			break
+		}
+
+		if tweetsResponse.Meta.NextToken == nil {
+			break
+		}
+
+		call.PaginationToken = tweetsResponse.Meta.NextToken
 	}
 
 	return &tweets, nil
