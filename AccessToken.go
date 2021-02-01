@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
+	go_http "github.com/leapforce-libraries/go_http"
 	oauth2 "github.com/leapforce-libraries/go_oauth2"
 )
 
@@ -15,22 +16,23 @@ type AccessToken struct {
 }
 
 func (service *Service) GetAccessToken() (*oauth2.Token, *errortools.Error) {
-	accessToken := AccessToken{}
+	if service.oAuth2 == nil {
+		return nil, errortools.ErrorMessage("OAuth2 not initialized")
+	}
 
-	skipAccessToken := true
+	accessToken := AccessToken{}
 
 	// basic authentication header
 	header := http.Header{}
 	header.Set("Authorization", service.basicAuthorization)
 
-	requestConfig := oauth2.RequestConfig{
+	requestConfig := go_http.RequestConfig{
 		URL:               AccessTokenURL,
 		ResponseModel:     &accessToken,
-		SkipAccessToken:   &skipAccessToken,
 		NonDefaultHeaders: &header,
 	}
 
-	_, _, e := service.post(&requestConfig)
+	_, _, e := service.oAuth2.HTTPRequest(http.MethodPost, &requestConfig, true)
 	if e != nil {
 		return nil, e
 	}

@@ -5,169 +5,15 @@ import (
 	"time"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
-	oauth2 "github.com/leapforce-libraries/go_oauth2"
+	go_http "github.com/leapforce-libraries/go_http"
+	models "github.com/leapforce-libraries/go_twitter_new/models"
 )
 
 type TweetsResponse struct {
-	Data     *[]Tweet   `json:"data"`
-	Includes *[]Include `json:"includes"`
-	Meta     *Meta      `json:"meta"`
-}
-
-type Tweet struct {
-	ID                 string               `json:"id"`
-	Text               string               `json:"text"`
-	CreatedAt          string               `json:"created_at"`
-	AuthorID           string               `json:"author_id"`
-	ConversationID     string               `json:"conversation_id"`
-	InReplyToUserID    string               `json:"in_reply_to_user_id"`
-	ReferencedTweets   *[]ReferencedTweet   `json:"referenced_tweets"`
-	Attachments        *[]Attachment        `json:"attachments"`
-	Geo                *Geo                 `json:"geo"`
-	ContextAnnotations *[]ContextAnnotation `json:"context_annotations"`
-	Entities           *[]Entity            `json:"entities"`
-	Withheld           *Withheld            `json:"withheld"`
-	PublicMetrics      *PublicMetrics       `json:"public_metrics"`
-	NonPublicMetrics   *NonPublicMetrics    `json:"non_public_metrics"`
-	OrganicMetrics     *OrganicMetrics      `json:"organic_metrics"`
-	PromotedMetrics    *PromotedMetrics     `json:"promoted_metrics"`
-	PossiblySensitive  *bool                `json:"possibly_sensitive"`
-	Language           *string              `json:"lang"`
-	ReplySettings      *string              `json:"reply_settings"`
-	Source             *string              `json:"source"`
-}
-
-type ReferencedTweet struct {
-	Type string `json:"type"`
-	ID   string `json:"id"`
-}
-
-type Attachment struct {
-	MediaKeys []string `json:"media_keys"`
-	PollIDs   []string `json:"poll_ids"`
-}
-
-type Geo struct {
-	Coordinates Coordinates `json:"coordinates"`
-	PlaceID     string      `json:"place_id"`
-}
-
-type Coordinates struct {
-	Type        string     `json:"type"`
-	Coordinates *[]float64 `json:"coordinates"`
-}
-
-type ContextAnnotation struct {
-	Domain ContextAnnotationDomain `json:"domain"`
-	Entity ContextAnnotationEntity `json:"entity"`
-}
-
-type ContextAnnotationDomain struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-type ContextAnnotationEntity struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-type Entity struct {
-	Annotations []EntityAnnotation `json:"annotations"`
-	URLs        []EntityURL        `json:"urls"`
-	Hashtags    []EntityHashtag    `json:"hashtags"`
-	Mentions    []EntityMention    `json:"mentions"`
-	Cashtags    []EntityCashtag    `json:"cashtags"`
-}
-
-type EntityAnnotation struct {
-	Start          int     `json:"start"`
-	End            int     `json:"end"`
-	Probability    float64 `json:"probability"`
-	Type           string  `json:"type"`
-	NormalizedText string  `json:"normalized_text"`
-}
-
-type EntityURL struct {
-	Start       int    `json:"start"`
-	End         int    `json:"end"`
-	URL         string `json:"url"`
-	ExpandedURL string `json:"expanded_url"`
-	DisplayURL  string `json:"display_url"`
-	UnwoundURL  string `json:"unwound_url"`
-}
-
-type EntityHashtag struct {
-	Start int    `json:"start"`
-	End   int    `json:"end"`
-	Tag   string `json:"tag"`
-}
-
-type EntityMention struct {
-	Start    int    `json:"start"`
-	End      int    `json:"end"`
-	Username string `json:"username"`
-}
-
-type EntityCashtag struct {
-	Start int    `json:"start"`
-	End   int    `json:"end"`
-	Tag   string `json:"tag"`
-}
-
-type Withheld struct {
-	Copyright    bool     `json:"copyright"`
-	CountryCodes []string `json:"country_codes"`
-	Scope        string   `json:"scope"`
-}
-
-type PublicMetrics struct {
-	RetweetCount int64 `json:"retweet_count"`
-	ReplyCount   int64 `json:"reply_count"`
-	LikeCount    int64 `json:"like_count"`
-	QuoteCount   int64 `json:"quote_count"`
-}
-
-type NonPublicMetrics struct {
-	ImpressionCount   int64 `json:"impression_count"`
-	URLLinkClicks     int64 `json:"url_link_clicks"`
-	UserProfileClicks int64 `json:"user_profile_clicks"`
-}
-
-type OrganicMetrics struct {
-	ImpressionCount   int64 `json:"impression_count"`
-	URLLinkClicks     int64 `json:"url_link_clicks"`
-	UserProfileClicks int64 `json:"user_profile_clicks"`
-	RetweetCount      int64 `json:"retweet_count"`
-	ReplyCount        int64 `json:"reply_count"`
-	LikeCount         int64 `json:"like_count"`
-}
-
-type PromotedMetrics struct {
-	ImpressionCount   int64 `json:"impression_count"`
-	URLLinkClicks     int64 `json:"url_link_clicks"`
-	UserProfileClicks int64 `json:"user_profile_clicks"`
-	RetweetCount      int64 `json:"retweet_count"`
-	ReplyCount        int64 `json:"reply_count"`
-	LikeCount         int64 `json:"like_count"`
-}
-
-type Include struct {
-	Tweets *[]Tweet `json:"tweets"`
-	//Users  *[]User  `json:"users"`
-	//Places *[]Place `json:"places"`
-	//Media  *[]Media `json:"media"`
-	//Polls  *[]Poll  `json:"polls"`
-}
-
-type Meta struct {
-	ResultCount   int     `json:"result_count"`
-	NewestID      *string `json:"newest_id"`
-	OldestID      *string `json:"oldest_id"`
-	NextToken     *string `json:"next_token"`
-	PreviousToken *string `json:"previous_token"`
+	Data     *[]models.Tweet  `json:"data"`
+	Includes *models.Includes `json:"includes"`
+	Meta     *models.Meta     `json:"meta"`
+	Error    *[]models.Error  `json:"errors"`
 }
 
 type Exclude string
@@ -177,17 +23,17 @@ const (
 	ExcludeReplies  Exclude = "replies"
 )
 
-type Expansion string
+type TweetExpansion string
 
 const (
-	ExpansionAttachmentsPollIDs         Expansion = "attachments.poll_ids"
-	ExpansionAttachmentsMediaKeys       Expansion = "attachments.media_keys"
-	ExpansionAuthorID                   Expansion = "author_id"
-	ExpansionEntitiesMentionsUsername   Expansion = "entities.mentions.username"
-	ExpansionGeoPlaceID                 Expansion = "geo.place_id"
-	ExpansionInReplyToUserID            Expansion = "in_reply_to_user_id"
-	ExpansionReferencedTweetsID         Expansion = "referenced_tweets.id"
-	ExpansionReferencedTweetsIDAuthorID Expansion = "referenced_tweets.id.author_id"
+	ExpansionAttachmentsPollIDs         TweetExpansion = "attachments.poll_ids"
+	ExpansionAttachmentsMediaKeys       TweetExpansion = "attachments.media_keys"
+	ExpansionAuthorID                   TweetExpansion = "author_id"
+	ExpansionEntitiesMentionsUsername   TweetExpansion = "entities.mentions.username"
+	ExpansionGeoPlaceID                 TweetExpansion = "geo.place_id"
+	ExpansionInReplyToUserID            TweetExpansion = "in_reply_to_user_id"
+	ExpansionReferencedTweetsID         TweetExpansion = "referenced_tweets.id"
+	ExpansionReferencedTweetsIDAuthorID TweetExpansion = "referenced_tweets.id.author_id"
 )
 
 type MediaField string
@@ -257,7 +103,7 @@ const (
 type UserField string
 
 const (
-	UserFieldreatedAt        UserField = "created_at"
+	UserFieldCreatedAt       UserField = "created_at"
 	UserFieldDescription     UserField = "description"
 	UserFieldEntities        UserField = "entities"
 	UserFieldID              UserField = "id"
@@ -275,7 +121,7 @@ const (
 
 type GetTweetsCall struct {
 	service         *Service
-	userID          int64
+	userID          string
 	EndTime         *time.Time `tw:"end_time"`
 	Exclude         *[]string  `tw:"exclude"`
 	Expansions      *[]string  `tw:"expansions"`
@@ -291,7 +137,7 @@ type GetTweetsCall struct {
 	UserFields      *[]string  `tw:"user.fields"`
 }
 
-func (service *Service) NewGetTweetsCall(userID int64) *GetTweetsCall {
+func (service *Service) NewGetTweetsCall(userID string) *GetTweetsCall {
 	return &GetTweetsCall{
 		service: service,
 		userID:  userID,
@@ -315,7 +161,7 @@ func (call *GetTweetsCall) SetExclude(excludes ...Exclude) *GetTweetsCall {
 	return call
 }
 
-func (call *GetTweetsCall) SetExpansions(expansions ...Expansion) *GetTweetsCall {
+func (call *GetTweetsCall) SetExpansions(expansions ...TweetExpansion) *GetTweetsCall {
 	elems := []string{}
 
 	for _, elem := range expansions {
@@ -333,10 +179,28 @@ func (call *GetTweetsCall) SetMaxResults(maxResults int) *GetTweetsCall {
 }
 
 func (call *GetTweetsCall) SetMediaFields(mediaFields ...MediaField) *GetTweetsCall {
+	return call.setMediaFields(false, mediaFields)
+}
+
+func (call *GetTweetsCall) AddMediaFields(mediaFields ...MediaField) *GetTweetsCall {
+	return call.setMediaFields(true, mediaFields)
+}
+
+func (call *GetTweetsCall) setMediaFields(add bool, mediaFields []MediaField) *GetTweetsCall {
 	elems := []string{}
 
-	for _, elem := range mediaFields {
-		elems = append(elems, string(elem))
+	if (*call).MediaFields != nil && add {
+		elems = *(*call).MediaFields
+	}
+
+	for _, mediaField := range mediaFields {
+		for _, _elem := range elems {
+			if _elem == string(mediaField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(mediaField))
+	next:
 	}
 	(*call).MediaFields = &elems
 
@@ -350,10 +214,28 @@ func (call *GetTweetsCall) SetPaginationToken(paginationToken string) *GetTweets
 }
 
 func (call *GetTweetsCall) SetPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
+	return call.setPlaceFields(false, placeFields)
+}
+
+func (call *GetTweetsCall) AddPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
+	return call.setPlaceFields(true, placeFields)
+}
+
+func (call *GetTweetsCall) setPlaceFields(add bool, placeFields []PlaceField) *GetTweetsCall {
 	elems := []string{}
 
-	for _, elem := range placeFields {
-		elems = append(elems, string(elem))
+	if (*call).PlaceFields != nil && add {
+		elems = *(*call).PlaceFields
+	}
+
+	for _, placeField := range placeFields {
+		for _, _elem := range elems {
+			if _elem == string(placeField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(placeField))
+	next:
 	}
 	(*call).PlaceFields = &elems
 
@@ -361,10 +243,28 @@ func (call *GetTweetsCall) SetPlaceFields(placeFields ...PlaceField) *GetTweetsC
 }
 
 func (call *GetTweetsCall) SetPollFields(pollFields ...PollField) *GetTweetsCall {
+	return call.setPollFields(false, pollFields)
+}
+
+func (call *GetTweetsCall) AddPollFields(pollFields ...PollField) *GetTweetsCall {
+	return call.setPollFields(true, pollFields)
+}
+
+func (call *GetTweetsCall) setPollFields(add bool, pollFields []PollField) *GetTweetsCall {
 	elems := []string{}
 
-	for _, elem := range pollFields {
-		elems = append(elems, string(elem))
+	if (*call).PollFields != nil && add {
+		elems = *(*call).PollFields
+	}
+
+	for _, pollField := range pollFields {
+		for _, _elem := range elems {
+			if _elem == string(pollField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(pollField))
+	next:
 	}
 	(*call).PollFields = &elems
 
@@ -384,10 +284,28 @@ func (call *GetTweetsCall) SetStartTime(startTime time.Time) *GetTweetsCall {
 }
 
 func (call *GetTweetsCall) SetTweetFields(tweetFields ...TweetField) *GetTweetsCall {
+	return call.setTweetFields(false, tweetFields)
+}
+
+func (call *GetTweetsCall) AddTweetFields(tweetFields ...TweetField) *GetTweetsCall {
+	return call.setTweetFields(true, tweetFields)
+}
+
+func (call *GetTweetsCall) setTweetFields(add bool, tweetFields []TweetField) *GetTweetsCall {
 	elems := []string{}
 
-	for _, elem := range tweetFields {
-		elems = append(elems, string(elem))
+	if (*call).TweetFields != nil && add {
+		elems = *(*call).TweetFields
+	}
+
+	for _, tweetField := range tweetFields {
+		for _, _elem := range elems {
+			if _elem == string(tweetField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(tweetField))
+	next:
 	}
 	(*call).TweetFields = &elems
 
@@ -401,39 +319,70 @@ func (call *GetTweetsCall) SetUntilID(untilID string) *GetTweetsCall {
 }
 
 func (call *GetTweetsCall) SetUserFields(userFields ...UserField) *GetTweetsCall {
+	return call.setUserFields(false, userFields)
+}
+
+func (call *GetTweetsCall) AddUserFields(userFields ...UserField) *GetTweetsCall {
+	return call.setUserFields(true, userFields)
+}
+
+func (call *GetTweetsCall) setUserFields(add bool, userFields []UserField) *GetTweetsCall {
 	elems := []string{}
 
-	for _, elem := range userFields {
-		elems = append(elems, string(elem))
+	if (*call).UserFields != nil && add {
+		elems = *(*call).UserFields
+	}
+
+	for _, userField := range userFields {
+		for _, _elem := range elems {
+			if _elem == string(userField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(userField))
+	next:
 	}
 	(*call).UserFields = &elems
 
 	return call
 }
 
-func (call *GetTweetsCall) Do() (*[]Tweet, *errortools.Error) {
-	tweets := []Tweet{}
+func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.Error) {
+	tweets := []models.Tweet{}
+	includes := models.Includes{
+		Tweets: &[]models.Tweet{},
+		Users:  &[]models.User{},
+		Places: &[]models.Place{},
+		Media:  &[]models.Media{},
+		Polls:  &[]models.Poll{},
+	}
 
 	rowCount := 0
 
 	for true {
 		params, e := call.service.urlParams(call)
 		if e != nil {
-			return nil, e
+			return nil, nil, e
 		}
 
-		urlPath := fmt.Sprintf("users/%v/tweets%s", call.userID, *params)
-		fmt.Println(urlPath)
+		urlPath := fmt.Sprintf("users/%s/tweets%s", call.userID, *params)
+		//fmt.Println(urlPath)
 
 		tweetsResponse := TweetsResponse{}
-		requestConfig := oauth2.RequestConfig{
+		requestConfig := go_http.RequestConfig{
 			URL:           call.service.url(urlPath),
 			ResponseModel: &tweetsResponse,
 		}
-		_, _, e = call.service.get(&requestConfig)
+
+		endpoint := "users_tweets"
+		call.service.rateLimitService.Check(endpoint)
+
+		_, response, e := call.service.get(&requestConfig)
 		if e != nil {
-			return nil, e
+			return nil, nil, e
 		}
+
+		call.service.rateLimitService.Set(endpoint, response)
 
 		if tweetsResponse.Data == nil {
 			break
@@ -442,8 +391,27 @@ func (call *GetTweetsCall) Do() (*[]Tweet, *errortools.Error) {
 		rowCountCall := len(*tweetsResponse.Data)
 
 		if rowCountCall > 0 {
-			tweets = append(tweets, *tweetsResponse.Data...)
 			rowCount += rowCountCall
+
+			tweets = append(tweets, *tweetsResponse.Data...)
+
+			if tweetsResponse.Includes != nil {
+				if tweetsResponse.Includes.Tweets != nil {
+					(*includes.Tweets) = append(*includes.Tweets, (*tweetsResponse.Includes.Tweets)...)
+				}
+				if tweetsResponse.Includes.Users != nil {
+					(*includes.Users) = append(*includes.Users, (*tweetsResponse.Includes.Users)...)
+				}
+				if tweetsResponse.Includes.Places != nil {
+					(*includes.Places) = append(*includes.Places, (*tweetsResponse.Includes.Places)...)
+				}
+				if tweetsResponse.Includes.Media != nil {
+					(*includes.Media) = append(*includes.Media, (*tweetsResponse.Includes.Media)...)
+				}
+				if tweetsResponse.Includes.Polls != nil {
+					(*includes.Polls) = append(*includes.Polls, (*tweetsResponse.Includes.Polls)...)
+				}
+			}
 		}
 
 		if tweetsResponse.Meta == nil {
@@ -457,5 +425,5 @@ func (call *GetTweetsCall) Do() (*[]Tweet, *errortools.Error) {
 		call.PaginationToken = tweetsResponse.Meta.NextToken
 	}
 
-	return &tweets, nil
+	return &tweets, &includes, nil
 }

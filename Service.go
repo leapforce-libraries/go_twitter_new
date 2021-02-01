@@ -11,8 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dghubble/oauth1"
+
 	errortools "github.com/leapforce-libraries/go_errortools"
+	go_http "github.com/leapforce-libraries/go_http"
 	oauth2 "github.com/leapforce-libraries/go_oauth2"
+	ratelimit "github.com/leapforce-libraries/go_ratelimit"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
 
@@ -26,17 +30,69 @@ const (
 //
 type Service struct {
 	basicAuthorization string
+	httpService        *go_http.Service
 	oAuth2             *oauth2.OAuth2
+	rateLimitService   *ratelimit.Service
 }
 
-type ServiceConfig struct {
+type ServiceConfigOAuth1 struct {
+	ConsumerKey           string
+	ConsumerSecret        string
+	AccessToken           string
+	AccessSecret          string
+	MaxRetries            *uint
+	SecondsBetweenRetries *uint32
+}
+
+type ServiceConfigOAuth2 struct {
 	ConsumerKey           string
 	ConsumerSecret        string
 	MaxRetries            *uint
 	SecondsBetweenRetries *uint32
 }
 
-func NewService(serviceConfig ServiceConfig) (*Service, *errortools.Error) {
+func NewServiceOAuth1(serviceConfig ServiceConfigOAuth1) (*Service, *errortools.Error) {
+	if serviceConfig.ConsumerKey == "" {
+		return nil, errortools.ErrorMessage("ConsumerKey not provided")
+	}
+
+	if serviceConfig.ConsumerSecret == "" {
+		return nil, errortools.ErrorMessage("ConsumerSecret not provided")
+	}
+
+	if serviceConfig.AccessToken == "" {
+		return nil, errortools.ErrorMessage("AccessToken not provided")
+	}
+
+	if serviceConfig.AccessSecret == "" {
+		return nil, errortools.ErrorMessage("AccessSecret not provided")
+	}
+
+	// create (organisation specific) Service
+	config := oauth1.NewConfig(serviceConfig.ConsumerKey, serviceConfig.ConsumerSecret)
+	token := oauth1.NewToken(serviceConfig.AccessToken, serviceConfig.AccessSecret)
+	httpClient := config.Client(oauth1.NoContext, token)
+
+	httpServiceConfig := go_http.ServiceConfig{
+		HTTPClient:            httpClient,
+		MaxRetries:            serviceConfig.MaxRetries,
+		SecondsBetweenRetries: serviceConfig.SecondsBetweenRetries,
+	}
+
+	headerRemaining := "x-rate-limit-remaining"
+	headerReset := "x-rate-limit-reset"
+	rateLimitServiceConfig := ratelimit.ServiceConfig{
+		HeaderRemaining: &headerRemaining,
+		HeaderReset:     &headerReset,
+	}
+
+	return &Service{
+		httpService:      go_http.NewService(httpServiceConfig),
+		rateLimitService: ratelimit.NewService(&rateLimitServiceConfig),
+	}, nil
+}
+
+func NewServiceOAuth2(serviceConfig ServiceConfigOAuth2) (*Service, *errortools.Error) {
 	if serviceConfig.ConsumerKey == "" {
 		return nil, errortools.ErrorMessage("ConsumerKey not provided")
 	}
@@ -62,38 +118,33 @@ func NewService(serviceConfig ServiceConfig) (*Service, *errortools.Error) {
 	return &service, nil
 }
 
-/*
-func (service *Service) ValidateToken() (*oauth2.Token, *errortools.Error) {
-	return service.oAuth2.ValidateToken()
-}*/
-
 // generic Get method
 //
-func (service *Service) get(requestConfig *oauth2.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	return service.httpRequest(http.MethodGet, requestConfig)
 }
 
 // generic Post method
 //
-func (service *Service) post(requestConfig *oauth2.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) post(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	return service.httpRequest(http.MethodPost, requestConfig)
 }
 
 // generic Put method
 //
-func (service *Service) put(requestConfig *oauth2.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) put(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	return service.httpRequest(http.MethodPut, requestConfig)
 }
 
 // generic Patch method
 //
-func (service *Service) patch(requestConfig *oauth2.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) patch(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	return service.httpRequest(http.MethodPatch, requestConfig)
 }
 
 // generic Delete method
 //
-func (service *Service) delete(requestConfig *oauth2.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) delete(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	return service.httpRequest(http.MethodDelete, requestConfig)
 }
 
@@ -101,11 +152,38 @@ func (service *Service) url(path string) string {
 	return fmt.Sprintf("%s/%s", APIURL, path)
 }
 
-func (service *Service) httpRequest(httpMethod string, requestConfig *oauth2.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
+func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	errorResponse := ErrorResponse{}
 	(*requestConfig).ErrorModel = &errorResponse
 
-	request, response, e := service.oAuth2.HTTP(httpMethod, requestConfig)
+	request := new(http.Request)
+	response := new(http.Response)
+	e := new(errortools.Error)
+
+	if service.httpService != nil {
+		request, response, e = service.httpService.HTTPRequest(httpMethod, requestConfig)
+	} else {
+		request, response, e = service.oAuth2.HTTPRequest(httpMethod, requestConfig, false)
+	}
+
+	if response != nil {
+		if response.StatusCode == 429 {
+			// handle rate limit
+			rateLimitReset, err := strconv.ParseInt(response.Header.Get("x-rate-limit-reset"), 10, 64)
+			if err == nil {
+				rateLimitResetUnix := time.Unix(rateLimitReset, 0)
+				duration := rateLimitResetUnix.Sub(time.Now())
+
+				if duration > 0 {
+					errortools.CaptureInfo(fmt.Sprintf("Rate limit exceeded, waiting %v ms.", duration.Milliseconds()))
+					time.Sleep(duration)
+
+					return service.httpRequest(httpMethod, requestConfig)
+
+				}
+			}
+		}
+	}
 
 	if e != nil {
 		if errorResponse.Detail != "" {
