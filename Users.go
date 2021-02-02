@@ -11,7 +11,7 @@ import (
 type UsersResponse struct {
 	Data     *models.User     `json:"data"`
 	Includes *models.Includes `json:"includes"`
-	Error    *[]models.Error  `json:"errors"`
+	Errors   *[]models.Error  `json:"errors"`
 }
 
 type UserExpansion string

@@ -13,7 +13,7 @@ type TweetsResponse struct {
 	Data     *[]models.Tweet  `json:"data"`
 	Includes *models.Includes `json:"includes"`
 	Meta     *models.Meta     `json:"meta"`
-	Error    *[]models.Error  `json:"errors"`
+	Errors   *[]models.Error  `json:"errors"`
 }
 
 type Exclude string
@@ -383,6 +383,10 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		}
 
 		call.service.rateLimitService.Set(endpoint, response)
+
+		if tweetsResponse.Errors != nil {
+
+		}
 
 		if tweetsResponse.Data == nil {
 			break
