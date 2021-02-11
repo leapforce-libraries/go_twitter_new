@@ -179,7 +179,6 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 					time.Sleep(duration)
 
 					return service.httpRequest(httpMethod, requestConfig)
-
 				}
 			}
 		}

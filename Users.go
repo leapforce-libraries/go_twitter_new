@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"encoding/json"
 	"fmt"
 
 	errortools "github.com/leapforce-libraries/go_errortools"
@@ -122,9 +123,22 @@ func (call *GetUsersCall) Do() (*models.User, *models.Includes, *errortools.Erro
 	endpoint := "users"
 	call.service.rateLimitService.Check(endpoint)
 
-	_, response, e := call.service.get(&requestConfig)
+	request, response, e := call.service.get(&requestConfig)
 	if e != nil {
 		return nil, nil, e
+	}
+
+	if usersResponse.Errors != nil {
+		e := new(errortools.Error)
+		e.SetRequest(request)
+		e.SetResponse(response)
+
+		b, err := json.Marshal(usersResponse.Errors)
+		if err == nil {
+			e.SetExtra("errors", string(b))
+		}
+
+		return nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(*usersResponse.Errors)))
 	}
 
 	call.service.rateLimitService.Set(endpoint, response)

@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -366,7 +367,7 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		}
 
 		urlPath := fmt.Sprintf("users/%s/tweets%s", call.userID, *params)
-		//fmt.Println(urlPath)
+		//fmt.Println(call.service.url(urlPath))
 
 		tweetsResponse := TweetsResponse{}
 		requestConfig := go_http.RequestConfig{
@@ -377,7 +378,7 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		endpoint := "users_tweets"
 		call.service.rateLimitService.Check(endpoint)
 
-		_, response, e := call.service.get(&requestConfig)
+		request, response, e := call.service.get(&requestConfig)
 		if e != nil {
 			return nil, nil, e
 		}
@@ -385,7 +386,16 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		call.service.rateLimitService.Set(endpoint, response)
 
 		if tweetsResponse.Errors != nil {
+			e := new(errortools.Error)
+			e.SetRequest(request)
+			e.SetResponse(response)
 
+			b, err := json.Marshal(tweetsResponse.Errors)
+			if err == nil {
+				e.SetExtra("errors", string(b))
+			}
+
+			return nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(*tweetsResponse.Errors)))
 		}
 
 		if tweetsResponse.Data == nil {
