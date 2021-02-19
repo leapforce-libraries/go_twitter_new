@@ -36,19 +36,15 @@ type Service struct {
 }
 
 type ServiceConfigOAuth1 struct {
-	ConsumerKey           string
-	ConsumerSecret        string
-	AccessToken           string
-	AccessSecret          string
-	MaxRetries            *uint
-	SecondsBetweenRetries *uint32
+	ConsumerKey    string
+	ConsumerSecret string
+	AccessToken    string
+	AccessSecret   string
 }
 
 type ServiceConfigOAuth2 struct {
-	ConsumerKey           string
-	ConsumerSecret        string
-	MaxRetries            *uint
-	SecondsBetweenRetries *uint32
+	ConsumerKey    string
+	ConsumerSecret string
 }
 
 func NewServiceOAuth1(serviceConfig ServiceConfigOAuth1) (*Service, *errortools.Error) {
@@ -74,9 +70,7 @@ func NewServiceOAuth1(serviceConfig ServiceConfigOAuth1) (*Service, *errortools.
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	httpServiceConfig := go_http.ServiceConfig{
-		HTTPClient:            httpClient,
-		MaxRetries:            serviceConfig.MaxRetries,
-		SecondsBetweenRetries: serviceConfig.SecondsBetweenRetries,
+		HTTPClient: httpClient,
 	}
 
 	headerRemaining := "x-rate-limit-remaining"
@@ -110,9 +104,7 @@ func NewServiceOAuth2(serviceConfig ServiceConfigOAuth2) (*Service, *errortools.
 	}
 
 	oAuth2Config := oauth2.OAuth2Config{
-		NewTokenFunction:      &tokenFunction,
-		MaxRetries:            serviceConfig.MaxRetries,
-		SecondsBetweenRetries: serviceConfig.SecondsBetweenRetries,
+		NewTokenFunction: &tokenFunction,
 	}
 	service.oAuth2 = oauth2.NewOAuth(oAuth2Config)
 	return &service, nil
