@@ -21,9 +21,9 @@ import (
 )
 
 const (
-	APIURL            string = "https://api.twitter.com/2"
-	AccessTokenURL    string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
-	DateLayoutISO8601 string = "2006-01-02T15:04:05Z"
+	apiURL            string = "https://api.twitter.com/2"
+	accessTokenURL    string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
+	dateLayoutISO8601 string = "2006-01-02T15:04:05Z"
 )
 
 // type
@@ -47,7 +47,7 @@ type ServiceConfigOAuth2 struct {
 	ConsumerSecret string
 }
 
-func NewServiceOAuth1(serviceConfig ServiceConfigOAuth1) (*Service, *errortools.Error) {
+func NewServiceOAuth1(serviceConfig *ServiceConfigOAuth1) (*Service, *errortools.Error) {
 	if serviceConfig.ConsumerKey == "" {
 		return nil, errortools.ErrorMessage("ConsumerKey not provided")
 	}
@@ -64,13 +64,18 @@ func NewServiceOAuth1(serviceConfig ServiceConfigOAuth1) (*Service, *errortools.
 		return nil, errortools.ErrorMessage("AccessSecret not provided")
 	}
 
-	// create (organisation specific) Service
+	// create Service
 	config := oauth1.NewConfig(serviceConfig.ConsumerKey, serviceConfig.ConsumerSecret)
 	token := oauth1.NewToken(serviceConfig.AccessToken, serviceConfig.AccessSecret)
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	httpServiceConfig := go_http.ServiceConfig{
 		HTTPClient: httpClient,
+	}
+
+	httpService, e := go_http.NewService(&httpServiceConfig)
+	if e != nil {
+		return nil, e
 	}
 
 	headerRemaining := "x-rate-limit-remaining"
@@ -81,7 +86,7 @@ func NewServiceOAuth1(serviceConfig ServiceConfigOAuth1) (*Service, *errortools.
 	}
 
 	return &Service{
-		httpService:      go_http.NewService(httpServiceConfig),
+		httpService:      httpService,
 		rateLimitService: ratelimit.NewService(&rateLimitServiceConfig),
 	}, nil
 }
@@ -141,7 +146,7 @@ func (service *Service) delete(requestConfig *go_http.RequestConfig) (*http.Requ
 }
 
 func (service *Service) url(path string) string {
-	return fmt.Sprintf("%s/%s", APIURL, path)
+	return fmt.Sprintf("%s/%s", apiURL, path)
 }
 
 func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
@@ -245,7 +250,7 @@ func (service *Service) urlParams(model interface{}) (*string, *errortools.Error
 			}
 			values.Set(fieldName, strings.Join(s, ","))
 		case time.Time:
-			values.Set(fieldName, v.Format(DateLayoutISO8601))
+			values.Set(fieldName, v.Format(dateLayoutISO8601))
 		}
 	}
 
