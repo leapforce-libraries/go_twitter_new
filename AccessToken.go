@@ -27,7 +27,7 @@ func (service *Service) GetAccessToken() (*oauth2.Token, *errortools.Error) {
 	header.Set("Authorization", service.basicAuthorization)
 
 	requestConfig := go_http.RequestConfig{
-		URL:               accessTokenURL,
+		URL:               accessTokenURL2,
 		ResponseModel:     &accessToken,
 		NonDefaultHeaders: &header,
 	}

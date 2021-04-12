@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -21,14 +22,21 @@ import (
 )
 
 const (
-	apiURL            string = "https://api.twitter.com/2"
-	accessTokenURL    string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
-	dateLayoutISO8601 string = "2006-01-02T15:04:05Z"
+	apiURL                 string = "https://api.twitter.com/2"
+	accessTokenURL2        string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
+	authorizeURL           string = "https://api.twitter.com/oauth/authorize"
+	requestTokenURL        string = "https://api.twitter.com/oauth/request_token"
+	accessTokenURL         string = "https://api.twitter.com/oauth/access_token"
+	requestTokenHTTPMethod string = http.MethodPost
+	accessTokenHTTPMethod  string = http.MethodPost
+	dateLayoutISO8601      string = "2006-01-02T15:04:05Z"
+	redirectURL            string = "http://localhost:8080/oauth/redirect"
 )
 
 // type
 //
 type Service struct {
+	consumerKey        string
 	basicAuthorization string
 	httpService        *go_http.Service
 	oAuth2             *oauth2.OAuth2
@@ -86,6 +94,7 @@ func NewServiceOAuth1(serviceConfig *ServiceConfigOAuth1) (*Service, *errortools
 	}
 
 	return &Service{
+		consumerKey:      serviceConfig.ConsumerKey,
 		httpService:      httpService,
 		rateLimitService: ratelimit.NewService(&rateLimitServiceConfig),
 	}, nil
@@ -260,4 +269,121 @@ func (service *Service) urlParams(model interface{}) (*string, *errortools.Error
 	}
 
 	return &params, nil
+}
+
+func (service *Service) InitToken() *errortools.Error {
+	_oauthCallback := "oauth_callback"
+	_oauthCallbackConfirmed := "oauth_callback_confirmed"
+	_oauthConsumerKey := "oauth_consumer_key"
+	_oauthToken := "oauth_token"
+	_oauthTokenSecret := "oauth_token_secret"
+	_oauthVerifier := "oauth_verifier"
+
+	if service == nil {
+		return errortools.ErrorMessage("Service is nil pointer")
+	}
+
+	// STEP 1: Create a request for a consumer application to obtain a request token
+	params := url.Values{}
+	params.Set(_oauthCallback, redirectURL)
+	params.Set(_oauthConsumerKey, service.consumerKey)
+
+	requestConfig := go_http.RequestConfig{
+		URL: fmt.Sprintf("%s?%s", requestTokenURL, params.Encode()),
+	}
+
+	_, response, e := service.httpService.HTTPRequest(requestTokenHTTPMethod, &requestConfig)
+	if e != nil {
+		return e
+	}
+
+	if response == nil {
+		return errortools.ErrorMessage("Response is nil")
+	}
+	if response.Body == nil {
+		return errortools.ErrorMessage("Response body is nil")
+	}
+
+	defer response.Body.Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return errortools.ErrorMessage(err)
+	}
+	values, err := url.ParseQuery(string(b))
+	if err != nil {
+		return errortools.ErrorMessage(err)
+	}
+
+	confirmed := values.Get(_oauthCallbackConfirmed)
+	if confirmed != "true" {
+		return errortools.ErrorMessage(fmt.Sprintf("oauth_callback_confirmed is '%s' (not 'true')", confirmed))
+	}
+
+	// STEP 2: Have the user authenticate, and send the consumer application a request token
+	oauthToken := values.Get(_oauthToken)
+	if oauthToken == "" {
+		return errortools.ErrorMessage(fmt.Sprintf("Response does not contain %s value", _oauthToken))
+	}
+	_url := fmt.Sprintf("%s?%s=%s", authorizeURL, _oauthToken, oauthToken)
+
+	fmt.Printf("Go to this url to get new access token:\n\n%s\n\n", _url)
+
+	// Create a new redirect route
+	http.HandleFunc("/oauth/redirect", func(w http.ResponseWriter, r *http.Request) {
+		if oauthToken != r.URL.Query().Get(_oauthToken) {
+			fmt.Printf("OAuth token verification failed")
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		oauthVerifier := r.URL.Query().Get(_oauthVerifier)
+
+		// STEP 3: Convert the request token into a usable access token
+		params := url.Values{}
+		params.Set(_oauthConsumerKey, service.consumerKey)
+		params.Set(_oauthToken, oauthToken)
+		params.Set(_oauthVerifier, oauthVerifier)
+
+		requestConfig := go_http.RequestConfig{
+			URL: fmt.Sprintf("%s?%s", accessTokenURL, params.Encode()),
+		}
+
+		// use new http service (without OAuth1.0 applied)
+		httpService, e := go_http.NewService(&go_http.ServiceConfig{
+			HTTPClient: &http.Client{},
+		})
+		if e != nil {
+			fmt.Println(e.Message())
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		_, response2, e := httpService.HTTPRequest(accessTokenHTTPMethod, &requestConfig)
+		if e != nil {
+			fmt.Println(e.Message())
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		defer response2.Body.Close()
+		b, err = ioutil.ReadAll(response2.Body)
+		if err != nil {
+			fmt.Println(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		values, err := url.ParseQuery(string(b))
+		if err != nil {
+			fmt.Println(err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		token := values[_oauthToken]
+		tokenSecret := values[_oauthTokenSecret]
+		fmt.Println(token, tokenSecret)
+
+		w.WriteHeader(http.StatusFound)
+
+		return
+	})
+
+	http.ListenAndServe(":8080", nil)
+
+	return nil
 }
