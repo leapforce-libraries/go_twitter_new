@@ -15,7 +15,7 @@ type AccessToken struct {
 	TokenType   string `json:"token_type"`
 }
 
-func (service *Service) GetAccessToken() (*oauth2.Token, *errortools.Error) {
+func (service *Service) GetOauth2AccessToken() (*oauth2.Token, *errortools.Error) {
 	if service.oAuth2 == nil {
 		return nil, errortools.ErrorMessage("OAuth2 not initialized")
 	}
