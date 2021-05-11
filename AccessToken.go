@@ -16,7 +16,7 @@ type AccessToken struct {
 }
 
 func (service *Service) GetOauth2AccessToken() (*oauth2.Token, *errortools.Error) {
-	if service.oAuth2 == nil {
+	if service.oAuth2Service == nil {
 		return nil, errortools.ErrorMessage("OAuth2 not initialized")
 	}
 
@@ -32,7 +32,7 @@ func (service *Service) GetOauth2AccessToken() (*oauth2.Token, *errortools.Error
 		NonDefaultHeaders: &header,
 	}
 
-	_, _, e := service.oAuth2.HTTPRequest(http.MethodPost, &requestConfig, true)
+	_, _, e := service.oAuth2Service.HTTPRequest(http.MethodPost, &requestConfig, true)
 	if e != nil {
 		return nil, e
 	}

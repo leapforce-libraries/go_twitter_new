@@ -48,7 +48,7 @@ type Service struct {
 	consumerKey        string
 	basicAuthorization string
 	httpService        *go_http.Service
-	oAuth2             *oauth2.OAuth2
+	oAuth2Service      *oauth2.Service
 	rateLimitService   *ratelimit.Service
 	oauthToken         string
 	oauthVerifier      string
@@ -146,10 +146,15 @@ func NewServiceOAuth2(serviceConfig ServiceConfigOAuth2) (*Service, *errortools.
 		return service.GetOauth2AccessToken()
 	}
 
-	oAuth2Config := oauth2.OAuth2Config{
+	oAuth2ServiceConfig := oauth2.ServiceConfig{
 		NewTokenFunction: &tokenFunction,
 	}
-	service.oAuth2 = oauth2.NewOAuth(oAuth2Config)
+	oAuth2Service, e := oauth2.NewService(&oAuth2ServiceConfig)
+	if e != nil {
+		return nil, e
+	}
+	service.oAuth2Service = oAuth2Service
+
 	return &service, nil
 }
 
@@ -202,7 +207,7 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 	if service.httpService != nil {
 		request, response, e = service.httpService.HTTPRequest(httpMethod, requestConfig)
 	} else {
-		request, response, e = service.oAuth2.HTTPRequest(httpMethod, requestConfig, false)
+		request, response, e = service.oAuth2Service.HTTPRequest(httpMethod, requestConfig, false)
 	}
 
 	if response != nil {
