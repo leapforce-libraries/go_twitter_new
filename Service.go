@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	apiName                string = "Twitter"
 	apiURL                 string = "https://api.twitter.com/2"
 	apiURLv1               string = "https://api.twitter.com/1.1"
 	accessTokenURL2        string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
@@ -341,4 +342,28 @@ func (service *Service) InitToken() *errortools.Error {
 	http.ListenAndServe(":8080", nil)
 
 	return nil
+}
+
+func (service *Service) APIName() string {
+	return apiName
+}
+
+func (service *Service) APIKey() string {
+	return service.consumerKey
+}
+
+func (service *Service) APICallCount() int64 {
+	if service.httpService != nil {
+		return service.httpService.RequestCount()
+	} else {
+		return service.oAuth2Service.APICallCount()
+	}
+}
+
+func (service *Service) APIReset() {
+	if service.httpService != nil {
+		service.httpService.ResetRequestCount()
+	} else {
+		service.oAuth2Service.APIReset()
+	}
 }
