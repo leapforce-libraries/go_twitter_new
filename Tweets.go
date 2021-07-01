@@ -10,6 +10,10 @@ import (
 	models "github.com/leapforce-libraries/go_twitter_new/models"
 )
 
+const (
+	maximumNumberOfTweetIDsPerCall int = 100
+)
+
 type TweetsResponse struct {
 	Data     *[]models.Tweet  `json:"data"`
 	Includes *models.Includes `json:"includes"`
@@ -120,7 +124,7 @@ const (
 	UserFieldWithheld        UserField = "withheld"
 )
 
-type GetTweetsCall struct {
+type GetUserTweetsCall struct {
 	service         *Service
 	userID          string
 	EndTime         *time.Time `tw:"end_time"`
@@ -138,20 +142,20 @@ type GetTweetsCall struct {
 	UserFields      *[]string  `tw:"user.fields"`
 }
 
-func (service *Service) NewGetTweetsCall(userID string) *GetTweetsCall {
-	return &GetTweetsCall{
+func (service *Service) NewGetUserTweetsCall(userID string) *GetUserTweetsCall {
+	return &GetUserTweetsCall{
 		service: service,
 		userID:  userID,
 	}
 }
 
-func (call *GetTweetsCall) SetEndTime(endTime time.Time) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetEndTime(endTime time.Time) *GetUserTweetsCall {
 	(*call).EndTime = &endTime
 
 	return call
 }
 
-func (call *GetTweetsCall) SetExclude(excludes ...Exclude) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetExclude(excludes ...Exclude) *GetUserTweetsCall {
 	elems := []string{}
 
 	for _, elem := range excludes {
@@ -162,7 +166,7 @@ func (call *GetTweetsCall) SetExclude(excludes ...Exclude) *GetTweetsCall {
 	return call
 }
 
-func (call *GetTweetsCall) SetExpansions(expansions ...TweetExpansion) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetExpansions(expansions ...TweetExpansion) *GetUserTweetsCall {
 	elems := []string{}
 
 	for _, elem := range expansions {
@@ -173,21 +177,32 @@ func (call *GetTweetsCall) SetExpansions(expansions ...TweetExpansion) *GetTweet
 	return call
 }
 
-func (call *GetTweetsCall) SetMaxResults(maxResults int) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetMaxResults(maxResults int) *GetUserTweetsCall {
 	(*call).MaxResults = &maxResults
 
 	return call
 }
 
-func (call *GetTweetsCall) SetMediaFields(mediaFields ...MediaField) *GetTweetsCall {
-	return call.setMediaFields(false, mediaFields)
+func (call *GetUserTweetsCall) SetMediaFields(mediaFields ...MediaField) *GetUserTweetsCall {
+	if call.MediaFields == nil {
+		call.MediaFields = &[]string{}
+	}
+	//return call.setMediaFields(false, mediaFields)
+	setMediaFields(true, call.MediaFields, mediaFields)
+	return call
 }
 
-func (call *GetTweetsCall) AddMediaFields(mediaFields ...MediaField) *GetTweetsCall {
-	return call.setMediaFields(true, mediaFields)
+func (call *GetUserTweetsCall) AddMediaFields(mediaFields ...MediaField) *GetUserTweetsCall {
+	if call.MediaFields == nil {
+		call.MediaFields = &[]string{}
+	}
+	//return call.setMediaFields(true, mediaFields)
+	setMediaFields(true, call.MediaFields, mediaFields)
+	return call
 }
 
-func (call *GetTweetsCall) setMediaFields(add bool, mediaFields []MediaField) *GetTweetsCall {
+/*
+func (call *GetUserTweetsCall) setMediaFields(add bool, mediaFields []MediaField) *GetUserTweetsCall {
 	elems := []string{}
 
 	if (*call).MediaFields != nil && add {
@@ -206,23 +221,34 @@ func (call *GetTweetsCall) setMediaFields(add bool, mediaFields []MediaField) *G
 	(*call).MediaFields = &elems
 
 	return call
-}
+}*/
 
-func (call *GetTweetsCall) SetPaginationToken(paginationToken string) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetPaginationToken(paginationToken string) *GetUserTweetsCall {
 	(*call).PaginationToken = &paginationToken
 
 	return call
 }
 
-func (call *GetTweetsCall) SetPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
-	return call.setPlaceFields(false, placeFields)
+func (call *GetUserTweetsCall) SetPlaceFields(placeFields ...PlaceField) *GetUserTweetsCall {
+	if call.PlaceFields == nil {
+		call.PlaceFields = &[]string{}
+	}
+	//return call.setPlaceFields(false, placeFields)
+	setPlaceFields(true, call.PlaceFields, placeFields)
+	return call
 }
 
-func (call *GetTweetsCall) AddPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
-	return call.setPlaceFields(true, placeFields)
+func (call *GetUserTweetsCall) AddPlaceFields(placeFields ...PlaceField) *GetUserTweetsCall {
+	if call.PlaceFields == nil {
+		call.PlaceFields = &[]string{}
+	}
+	//return call.setPlaceFields(true, placeFields)
+	setPlaceFields(true, call.PlaceFields, placeFields)
+	return call
 }
 
-func (call *GetTweetsCall) setPlaceFields(add bool, placeFields []PlaceField) *GetTweetsCall {
+/*
+func (call *GetUserTweetsCall) setPlaceFields(add bool, placeFields []PlaceField) *GetUserTweetsCall {
 	elems := []string{}
 
 	if (*call).PlaceFields != nil && add {
@@ -241,17 +267,28 @@ func (call *GetTweetsCall) setPlaceFields(add bool, placeFields []PlaceField) *G
 	(*call).PlaceFields = &elems
 
 	return call
+}*/
+
+func (call *GetUserTweetsCall) SetPollFields(pollFields ...PollField) *GetUserTweetsCall {
+	if call.PollFields == nil {
+		call.PollFields = &[]string{}
+	}
+	//return call.setPollFields(false, pollFields)
+	setPollFields(true, call.PollFields, pollFields)
+	return call
 }
 
-func (call *GetTweetsCall) SetPollFields(pollFields ...PollField) *GetTweetsCall {
-	return call.setPollFields(false, pollFields)
+func (call *GetUserTweetsCall) AddPollFields(pollFields ...PollField) *GetUserTweetsCall {
+	if call.PollFields == nil {
+		call.PollFields = &[]string{}
+	}
+	//return call.setPollFields(true, pollFields)
+	setPollFields(true, call.PollFields, pollFields)
+	return call
 }
 
-func (call *GetTweetsCall) AddPollFields(pollFields ...PollField) *GetTweetsCall {
-	return call.setPollFields(true, pollFields)
-}
-
-func (call *GetTweetsCall) setPollFields(add bool, pollFields []PollField) *GetTweetsCall {
+/*
+func (call *GetUserTweetsCall) setPollFields(add bool, pollFields []PollField) *GetUserTweetsCall {
 	elems := []string{}
 
 	if (*call).PollFields != nil && add {
@@ -270,29 +307,40 @@ func (call *GetTweetsCall) setPollFields(add bool, pollFields []PollField) *GetT
 	(*call).PollFields = &elems
 
 	return call
-}
+}*/
 
-func (call *GetTweetsCall) SetSinceID(sinceID string) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetSinceID(sinceID string) *GetUserTweetsCall {
 	(*call).SinceID = &sinceID
 
 	return call
 }
 
-func (call *GetTweetsCall) SetStartTime(startTime time.Time) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetStartTime(startTime time.Time) *GetUserTweetsCall {
 	(*call).StartTime = &startTime
 
 	return call
 }
 
-func (call *GetTweetsCall) SetTweetFields(tweetFields ...TweetField) *GetTweetsCall {
-	return call.setTweetFields(false, tweetFields)
+func (call *GetUserTweetsCall) SetTweetFields(tweetFields ...TweetField) *GetUserTweetsCall {
+	if call.TweetFields == nil {
+		call.TweetFields = &[]string{}
+	}
+	//return call.setTweetFields(false, tweetFields)
+	setTweetFields(false, call.TweetFields, tweetFields)
+	return call
 }
 
-func (call *GetTweetsCall) AddTweetFields(tweetFields ...TweetField) *GetTweetsCall {
-	return call.setTweetFields(true, tweetFields)
+func (call *GetUserTweetsCall) AddTweetFields(tweetFields ...TweetField) *GetUserTweetsCall {
+	if call.TweetFields == nil {
+		call.TweetFields = &[]string{}
+	}
+	//return call.setTweetFields(true, tweetFields)
+	setTweetFields(true, call.TweetFields, tweetFields)
+	return call
 }
 
-func (call *GetTweetsCall) setTweetFields(add bool, tweetFields []TweetField) *GetTweetsCall {
+/*
+func (call *GetUserTweetsCall) setTweetFields(add bool, tweetFields []TweetField) *GetUserTweetsCall {
 	elems := []string{}
 
 	if (*call).TweetFields != nil && add {
@@ -311,23 +359,34 @@ func (call *GetTweetsCall) setTweetFields(add bool, tweetFields []TweetField) *G
 	(*call).TweetFields = &elems
 
 	return call
-}
+}*/
 
-func (call *GetTweetsCall) SetUntilID(untilID string) *GetTweetsCall {
+func (call *GetUserTweetsCall) SetUntilID(untilID string) *GetUserTweetsCall {
 	(*call).UntilID = &untilID
 
 	return call
 }
 
-func (call *GetTweetsCall) SetUserFields(userFields ...UserField) *GetTweetsCall {
-	return call.setUserFields(false, userFields)
+func (call *GetUserTweetsCall) SetUserFields(userFields ...UserField) *GetUserTweetsCall {
+	if call.UserFields == nil {
+		call.UserFields = &[]string{}
+	}
+	//return call.setUserFields(false, userFields)
+	setUserFields(false, call.UserFields, userFields)
+	return call
 }
 
-func (call *GetTweetsCall) AddUserFields(userFields ...UserField) *GetTweetsCall {
-	return call.setUserFields(true, userFields)
+func (call *GetUserTweetsCall) AddUserFields(userFields ...UserField) *GetUserTweetsCall {
+	if call.UserFields == nil {
+		call.UserFields = &[]string{}
+	}
+	//return call.setUserFields(true, userFields)
+	setUserFields(true, call.UserFields, userFields)
+	return call
 }
 
-func (call *GetTweetsCall) setUserFields(add bool, userFields []UserField) *GetTweetsCall {
+/*
+func (call *GetUserTweetsCall) setUserFields(add bool, userFields []UserField) *GetUserTweetsCall {
 	elems := []string{}
 
 	if (*call).UserFields != nil && add {
@@ -346,9 +405,9 @@ func (call *GetTweetsCall) setUserFields(add bool, userFields []UserField) *GetT
 	(*call).UserFields = &elems
 
 	return call
-}
+}*/
 
-func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.Error) {
+func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.Error) {
 	tweets := []models.Tweet{}
 	includes := models.Includes{
 		Tweets: &[]models.Tweet{},
@@ -360,7 +419,7 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 
 	rowCount := 0
 
-	for true {
+	for {
 		params, e := call.service.urlParams(call)
 		if e != nil {
 			return nil, nil, e
@@ -437,6 +496,316 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		}
 
 		call.PaginationToken = tweetsResponse.Meta.NextToken
+	}
+
+	return &tweets, &includes, nil
+}
+
+type GetTweetsCall struct {
+	service     *Service
+	userID      string
+	Expansions  *[]string `tw:"expansions"`
+	IDs         []string  `tw:"ids"`
+	MediaFields *[]string `tw:"media.fields"`
+	PlaceFields *[]string `tw:"place.fields"`
+	PollFields  *[]string `tw:"poll.fields"`
+	TweetFields *[]string `tw:"tweet.fields"`
+	UserFields  *[]string `tw:"user.fields"`
+}
+
+func (service *Service) NewGetTweetsCall(userID string) *GetTweetsCall {
+	return &GetTweetsCall{
+		service: service,
+		userID:  userID,
+	}
+}
+
+func (call *GetTweetsCall) SetExpansions(expansions ...TweetExpansion) *GetTweetsCall {
+	elems := []string{}
+
+	for _, elem := range expansions {
+		elems = append(elems, string(elem))
+	}
+	(*call).Expansions = &elems
+
+	return call
+}
+
+func (call *GetTweetsCall) SetIDs(ids []string) *GetTweetsCall {
+	(*call).IDs = ids
+
+	return call
+}
+
+func (call *GetTweetsCall) SetMediaFields(mediaFields ...MediaField) *GetTweetsCall {
+	if call.MediaFields == nil {
+		call.MediaFields = &[]string{}
+	}
+	setMediaFields(false, call.MediaFields, mediaFields)
+	return call
+}
+
+func (call *GetTweetsCall) AddMediaFields(mediaFields ...MediaField) *GetTweetsCall {
+	if call.MediaFields == nil {
+		call.MediaFields = &[]string{}
+	}
+	setMediaFields(true, call.MediaFields, mediaFields)
+	return call
+}
+
+func setMediaFields(add bool, mediaFields *[]string, setMediaFields []MediaField) {
+	elems := []string{}
+
+	if mediaFields != nil && add {
+		elems = *mediaFields
+	}
+
+	for _, mediaField := range setMediaFields {
+		for _, _elem := range elems {
+			if _elem == string(mediaField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(mediaField))
+	next:
+	}
+	(*mediaFields) = elems
+}
+
+func (call *GetTweetsCall) SetPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
+	if call.PlaceFields == nil {
+		call.PlaceFields = &[]string{}
+	}
+	setPlaceFields(false, call.PlaceFields, placeFields)
+	return call
+}
+
+func (call *GetTweetsCall) AddPlaceFields(placeFields ...PlaceField) *GetTweetsCall {
+	if call.PlaceFields == nil {
+		call.PlaceFields = &[]string{}
+	}
+	setPlaceFields(true, call.PlaceFields, placeFields)
+	return call
+}
+
+func setPlaceFields(add bool, placeFields *[]string, setPlaceFields []PlaceField) {
+	elems := []string{}
+
+	if placeFields != nil && add {
+		elems = *placeFields
+	}
+
+	for _, placeField := range setPlaceFields {
+		for _, _elem := range elems {
+			if _elem == string(placeField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(placeField))
+	next:
+	}
+	(*placeFields) = elems
+}
+
+func (call *GetTweetsCall) SetPollFields(pollFields ...PollField) *GetTweetsCall {
+	if call.PollFields == nil {
+		call.PollFields = &[]string{}
+	}
+	setPollFields(false, call.PollFields, pollFields)
+	return call
+}
+
+func (call *GetTweetsCall) AddPollFields(pollFields ...PollField) *GetTweetsCall {
+	if call.PollFields == nil {
+		call.PollFields = &[]string{}
+	}
+	setPollFields(true, call.PollFields, pollFields)
+	return call
+}
+
+func setPollFields(add bool, pollFields *[]string, setPollFields []PollField) {
+	elems := []string{}
+
+	if pollFields != nil && add {
+		elems = *pollFields
+	}
+
+	for _, pollField := range setPollFields {
+		for _, _elem := range elems {
+			if _elem == string(pollField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(pollField))
+	next:
+	}
+	(*pollFields) = elems
+}
+
+func (call *GetTweetsCall) SetTweetFields(tweetFields ...TweetField) *GetTweetsCall {
+	if call.TweetFields == nil {
+		call.TweetFields = &[]string{}
+	}
+	setTweetFields(false, call.TweetFields, tweetFields)
+	return call
+}
+
+func (call *GetTweetsCall) AddTweetFields(tweetFields ...TweetField) *GetTweetsCall {
+	if call.TweetFields == nil {
+		call.TweetFields = &[]string{}
+	}
+	setTweetFields(true, call.TweetFields, tweetFields)
+	return call
+}
+
+func setTweetFields(add bool, tweetFields *[]string, setTweetFields []TweetField) {
+	elems := []string{}
+
+	if tweetFields != nil && add {
+		elems = *tweetFields
+	}
+
+	for _, tweetField := range setTweetFields {
+		for _, _elem := range elems {
+			if _elem == string(tweetField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(tweetField))
+	next:
+	}
+	(*tweetFields) = elems
+}
+
+func (call *GetTweetsCall) SetUserFields(userFields ...UserField) *GetTweetsCall {
+	if call.UserFields == nil {
+		call.UserFields = &[]string{}
+	}
+	setUserFields(false, call.UserFields, userFields)
+	return call
+}
+
+func (call *GetTweetsCall) AddUserFields(userFields ...UserField) *GetTweetsCall {
+	if call.UserFields == nil {
+		call.UserFields = &[]string{}
+	}
+	setUserFields(true, call.UserFields, userFields)
+	return call
+}
+
+func setUserFields(add bool, userFields *[]string, setUserFields []UserField) {
+	elems := []string{}
+
+	if userFields != nil && add {
+		elems = *userFields
+	}
+
+	for _, userField := range setUserFields {
+		for _, _elem := range elems {
+			if _elem == string(userField) {
+				goto next
+			}
+		}
+		elems = append(elems, string(userField))
+	next:
+	}
+	(*userFields) = elems
+}
+
+func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.Error) {
+	if len(call.IDs) == 0 {
+		return nil, nil, errortools.ErrorMessage("No TweetIDs specified")
+	}
+
+	tweets := []models.Tweet{}
+	includes := models.Includes{}
+
+	ids := call.IDs
+	for {
+		_ids := ids
+		if len(ids) > maximumNumberOfTweetIDsPerCall {
+			_ids = ids[:maximumNumberOfTweetIDsPerCall]
+		}
+
+		call.IDs = _ids
+		params, e := call.service.urlParams(call)
+		if e != nil {
+			return nil, nil, e
+		}
+
+		urlPath := fmt.Sprintf("tweets%s", *params)
+		//fmt.Println(call.service.url(urlPath))
+
+		tweetsResponse := TweetsResponse{}
+		requestConfig := go_http.RequestConfig{
+			URL:           call.service.url(urlPath),
+			ResponseModel: &tweetsResponse,
+		}
+
+		endpoint := "tweets"
+		call.service.rateLimitService.Check(endpoint)
+
+		request, response, e := call.service.get(&requestConfig)
+		if e != nil {
+			return nil, nil, e
+		}
+
+		call.service.rateLimitService.Set(endpoint, response)
+
+		if tweetsResponse.Errors != nil {
+			e := new(errortools.Error)
+			e.SetRequest(request)
+			e.SetResponse(response)
+
+			b, err := json.Marshal(tweetsResponse.Errors)
+			if err == nil {
+				e.SetExtra("errors", string(b))
+			}
+
+			return nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(*tweetsResponse.Errors)))
+		}
+
+		if tweetsResponse.Data != nil {
+			tweets = append(tweets, (*tweetsResponse.Data)...)
+		}
+
+		if tweetsResponse.Includes != nil {
+			if includes.Tweets == nil {
+				includes.Tweets = tweetsResponse.Includes.Tweets
+			} else if tweetsResponse.Includes.Tweets != nil {
+				(*includes.Tweets) = append(*includes.Tweets, (*tweetsResponse.Includes.Tweets)...)
+			}
+
+			if includes.Users == nil {
+				includes.Users = tweetsResponse.Includes.Users
+			} else if tweetsResponse.Includes.Users != nil {
+				(*includes.Users) = append(*includes.Users, (*tweetsResponse.Includes.Users)...)
+			}
+
+			if includes.Places == nil {
+				includes.Places = tweetsResponse.Includes.Places
+			} else if tweetsResponse.Includes.Places != nil {
+				(*includes.Places) = append(*includes.Places, (*tweetsResponse.Includes.Places)...)
+			}
+
+			if includes.Polls == nil {
+				includes.Polls = tweetsResponse.Includes.Polls
+			} else if tweetsResponse.Includes.Polls != nil {
+				(*includes.Polls) = append(*includes.Polls, (*tweetsResponse.Includes.Polls)...)
+			}
+
+			if includes.Media == nil {
+				includes.Media = tweetsResponse.Includes.Media
+			} else if tweetsResponse.Includes.Media != nil {
+				(*includes.Media) = append(*includes.Media, (*tweetsResponse.Includes.Media)...)
+			}
+		}
+
+		if len(ids) <= maximumNumberOfTweetIDsPerCall {
+			break
+		}
+
+		ids = ids[maximumNumberOfTweetIDsPerCall:]
 	}
 
 	return &tweets, &includes, nil
