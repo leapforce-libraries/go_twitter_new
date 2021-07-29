@@ -257,6 +257,8 @@ github.com/leapforce-libraries/go_http v0.0.0-20210519135226-98001b7ce271/go.mod
 github.com/leapforce-libraries/go_http v0.0.0-20210608214414-8d1742924b40/go.mod h1:t8rByklGh4QeraSDuN5M7nwR/J0G2/nIftUA+YubS+U=
 github.com/leapforce-libraries/go_http v0.0.0-20210628194000-f91448d2b771 h1:v5RFaDhiR+2mzTurQPVixu+XYEV7VcLqBDuWMMq2BTI=
 github.com/leapforce-libraries/go_http v0.0.0-20210628194000-f91448d2b771/go.mod h1:oLjyrzaC0GhA55yFJ5Dlb5eOR1ASojX9tKxLIOlPXtY=
+github.com/leapforce-libraries/go_http v0.0.0-20210713192036-b809589a39a5 h1:QKiLx7ehchfKgUgFVcF5s1Q++bnId8/TEwrFXuyDexw=
+github.com/leapforce-libraries/go_http v0.0.0-20210713192036-b809589a39a5/go.mod h1:oLjyrzaC0GhA55yFJ5Dlb5eOR1ASojX9tKxLIOlPXtY=
 github.com/leapforce-libraries/go_integration v0.0.0-20210518212324-91d97f45cf96 h1:jq83C1yfbXmDzA4hgA76YpcPPFtd7gGYPObmvmusH/E=
 github.com/leapforce-libraries/go_integration v0.0.0-20210518212324-91d97f45cf96/go.mod h1:H66cM421lWMH1xyiirtH5nhs5U8NPFH6U3UsfaGv+Is=
 github.com/leapforce-libraries/go_integration v0.0.0-20210526180733-68a2aeb4410c h1:gTyL3XWXz5o5YV/1iAlyVNm5+wx+YVzcWVXbNgZ1oLg=
@@ -283,6 +285,8 @@ github.com/leapforce-libraries/go_oauth2 v0.0.0-20210512133125-82d2301f9f30 h1:l
 github.com/leapforce-libraries/go_oauth2 v0.0.0-20210512133125-82d2301f9f30/go.mod h1:oe3/D2ySjsUQquIQ+w4wpqm3Tu69NtdJFtlsbCJcb/E=
 github.com/leapforce-libraries/go_oauth2 v0.0.0-20210608214458-f72aff67f485 h1:h90HcCFc/rSskvT+h7ROu60y4U59qpM1d3YCcLxbaOM=
 github.com/leapforce-libraries/go_oauth2 v0.0.0-20210608214458-f72aff67f485/go.mod h1:aTwVNh/21b9Cl1vlHzwx3fdXaj9F00kCjjSjiJRXnv0=
+github.com/leapforce-libraries/go_oauth2 v0.0.0-20210713192125-c6d80d675358 h1:TUCqajN8abW5Q6K/UwtuBc/FL16SFkyBjVhibDoPRK4=
+github.com/leapforce-libraries/go_oauth2 v0.0.0-20210713192125-c6d80d675358/go.mod h1:qaqzJP0MtGLyV7v7rQ9ORBJ2iXHzZl0nD07ztA0efh8=
 github.com/leapforce-libraries/go_ratelimit v0.0.0-20201125093857-b11d8519dd7e h1:TiD7Cswdgv2kFl9yIfT3MJewue8+tZNtBGDUwa4ekJU=
 github.com/leapforce-libraries/go_ratelimit v0.0.0-20201125093857-b11d8519dd7e/go.mod h1:U2gLdAZeBAuU179GpKgTI52J8zaVY1V+sFhLfHh8ONQ=
 github.com/leapforce-libraries/go_ratelimit v0.0.0-20210201164536-d132c1be6d67 h1:Mrgry05VsEPF37Ec+85Gn9MNXkTH1VZzUd0YYZYfteA=
