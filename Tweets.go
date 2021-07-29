@@ -762,7 +762,8 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 				e.SetExtra("errors", string(b))
 			}
 
-			return nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(*tweetsResponse.Errors)))
+			e.SetMessage(fmt.Sprintf("%v errors found", len(*tweetsResponse.Errors)))
+			errortools.CaptureError(e)
 		}
 
 		if tweetsResponse.Data != nil {

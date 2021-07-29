@@ -138,7 +138,8 @@ func (call *GetUsersCall) Do() (*models.User, *models.Includes, *errortools.Erro
 			e.SetExtra("errors", string(b))
 		}
 
-		return nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(*usersResponse.Errors)))
+		e.SetMessage(fmt.Sprintf("%v errors found", len(*usersResponse.Errors)))
+		errortools.CaptureError(e)
 	}
 
 	call.service.rateLimitService.Set(endpoint, response)
