@@ -201,9 +201,9 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 	errorResponse := ErrorResponse{}
 	(*requestConfig).ErrorModel = &errorResponse
 
-	request := new(http.Request)
-	response := new(http.Response)
-	e := new(errortools.Error)
+	var request *http.Request = nil
+	var response *http.Response = nil
+	var e *errortools.Error = nil
 
 	if service.httpService != nil {
 		request, response, e = service.httpService.HTTPRequest(httpMethod, requestConfig)
@@ -217,7 +217,7 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 			rateLimitReset, err := strconv.ParseInt(response.Header.Get("x-rate-limit-reset"), 10, 64)
 			if err == nil {
 				rateLimitResetUnix := time.Unix(rateLimitReset, 0)
-				duration := rateLimitResetUnix.Sub(time.Now())
+				duration := time.Until(rateLimitResetUnix)
 
 				if duration > 0 {
 					errortools.CaptureInfo(fmt.Sprintf("Rate limit exceeded, waiting %v ms.", duration.Milliseconds()))
@@ -292,11 +292,7 @@ func (service *Service) urlParams(model interface{}) (*string, *errortools.Error
 		case bool:
 			values.Set(fieldName, strconv.FormatBool(v))
 		case []string:
-			s := []string{}
-			for _, v1 := range v {
-				s = append(s, v1)
-			}
-			values.Set(fieldName, strings.Join(s, ","))
+			values.Set(fieldName, strings.Join(v, ","))
 		case time.Time:
 			values.Set(fieldName, v.Format(dateLayoutISO8601))
 		}

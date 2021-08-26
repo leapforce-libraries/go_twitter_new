@@ -407,7 +407,7 @@ func (call *GetUserTweetsCall) setUserFields(add bool, userFields []UserField) *
 	return call
 }*/
 
-func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.Error) {
+func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]string, *errortools.Error) {
 	tweets := []models.Tweet{}
 	includes := models.Includes{
 		Tweets: &[]models.Tweet{},
@@ -419,10 +419,12 @@ func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errorto
 
 	rowCount := 0
 
+	var nonExistingTweetIDs []string
+
 	for {
 		params, e := call.service.urlParams(call)
 		if e != nil {
-			return nil, nil, e
+			return nil, nil, nil, e
 		}
 
 		urlPath := fmt.Sprintf("users/%s/tweets%s", call.userID, *params)
@@ -439,22 +441,33 @@ func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errorto
 
 		request, response, e := call.service.get(&requestConfig)
 		if e != nil {
-			return nil, nil, e
+			return nil, nil, nil, e
 		}
 
 		call.service.rateLimitService.Set(endpoint, response)
+		var errors []models.Error
 
 		if tweetsResponse.Errors != nil {
-			e := new(errortools.Error)
-			e.SetRequest(request)
-			e.SetResponse(response)
-
-			b, err := json.Marshal(tweetsResponse.Errors)
-			if err == nil {
-				e.SetExtra("errors", string(b))
+			for _, tweetError := range *tweetsResponse.Errors {
+				if tweetError.Title == "Not Found Error" {
+					nonExistingTweetIDs = append(nonExistingTweetIDs, tweetError.Value)
+				} else {
+					errors = append(errors, tweetError)
+				}
 			}
 
-			return nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(*tweetsResponse.Errors)))
+			if len(errors) > 0 {
+				e := new(errortools.Error)
+				e.SetRequest(request)
+				e.SetResponse(response)
+
+				b, err := json.Marshal(errors)
+				if err == nil {
+					e.SetExtra("errors", string(b))
+				}
+
+				return nil, nil, nil, errortools.ErrorMessage(fmt.Sprintf("%v errors found", len(errors)))
+			}
 		}
 
 		if tweetsResponse.Data == nil {
@@ -498,7 +511,7 @@ func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errorto
 		call.PaginationToken = tweetsResponse.Meta.NextToken
 	}
 
-	return &tweets, &includes, nil
+	return &tweets, &includes, &nonExistingTweetIDs, nil
 }
 
 type GetTweetsCall struct {
@@ -712,13 +725,14 @@ func setUserFields(add bool, userFields *[]string, setUserFields []UserField) {
 	(*userFields) = elems
 }
 
-func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.Error) {
+func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]string, *errortools.Error) {
 	if len(call.IDs) == 0 {
-		return nil, nil, errortools.ErrorMessage("No TweetIDs specified")
+		return nil, nil, nil, errortools.ErrorMessage("No TweetIDs specified")
 	}
 
 	tweets := []models.Tweet{}
 	includes := models.Includes{}
+	nonExistingTweetIDs := []string{}
 
 	ids := call.IDs
 	for {
@@ -730,7 +744,7 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		call.IDs = _ids
 		params, e := call.service.urlParams(call)
 		if e != nil {
-			return nil, nil, e
+			return nil, nil, nil, e
 		}
 
 		urlPath := fmt.Sprintf("tweets%s", *params)
@@ -747,23 +761,35 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 
 		request, response, e := call.service.get(&requestConfig)
 		if e != nil {
-			return nil, nil, e
+			return nil, nil, nil, e
 		}
 
 		call.service.rateLimitService.Set(endpoint, response)
 
-		if tweetsResponse.Errors != nil {
-			e := new(errortools.Error)
-			e.SetRequest(request)
-			e.SetResponse(response)
+		var errors []models.Error
 
-			b, err := json.Marshal(tweetsResponse.Errors)
-			if err == nil {
-				e.SetExtra("errors", string(b))
+		if tweetsResponse.Errors != nil {
+			for _, tweetError := range *tweetsResponse.Errors {
+				if tweetError.Title == "Not Found Error" {
+					nonExistingTweetIDs = append(nonExistingTweetIDs, tweetError.Value)
+				} else {
+					errors = append(errors, tweetError)
+				}
 			}
 
-			e.SetMessage(fmt.Sprintf("%v errors found", len(*tweetsResponse.Errors)))
-			errortools.CaptureError(e)
+			if len(errors) > 0 {
+				e := new(errortools.Error)
+				e.SetRequest(request)
+				e.SetResponse(response)
+
+				b, err := json.Marshal(errors)
+				if err == nil {
+					e.SetExtra("errors", string(b))
+				}
+
+				e.SetMessage(fmt.Sprintf("%v errors found", len(errors)))
+				errortools.CaptureError(e)
+			}
 		}
 
 		if tweetsResponse.Data != nil {
@@ -809,5 +835,5 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *errortools.
 		ids = ids[maximumNumberOfTweetIDsPerCall:]
 	}
 
-	return &tweets, &includes, nil
+	return &tweets, &includes, &nonExistingTweetIDs, nil
 }
