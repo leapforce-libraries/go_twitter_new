@@ -165,30 +165,6 @@ func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request
 	return service.httpRequest(http.MethodGet, requestConfig)
 }
 
-// generic Post method
-//
-func (service *Service) post(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
-	return service.httpRequest(http.MethodPost, requestConfig)
-}
-
-// generic Put method
-//
-func (service *Service) put(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
-	return service.httpRequest(http.MethodPut, requestConfig)
-}
-
-// generic Patch method
-//
-func (service *Service) patch(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
-	return service.httpRequest(http.MethodPatch, requestConfig)
-}
-
-// generic Delete method
-//
-func (service *Service) delete(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
-	return service.httpRequest(http.MethodDelete, requestConfig)
-}
-
 func (service *Service) url(path string) string {
 	return fmt.Sprintf("%s/%s", apiURL, path)
 }
@@ -206,9 +182,9 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 	var e *errortools.Error = nil
 
 	if service.httpService != nil {
-		request, response, e = service.httpService.HTTPRequest(httpMethod, requestConfig)
+		request, response, e = service.httpService.HTTPRequest(requestConfig)
 	} else {
-		request, response, e = service.oAuth2Service.HTTPRequest(httpMethod, requestConfig, false)
+		request, response, e = service.oAuth2Service.HTTPRequest(requestConfig)
 	}
 
 	if response != nil {

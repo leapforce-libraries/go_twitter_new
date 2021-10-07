@@ -16,10 +16,11 @@ func (service *Service) GetOauthToken(redirectURL string) *errortools.Error {
 	params.Set(_OauthConsumerKey, service.consumerKey)
 
 	requestConfig := go_http.RequestConfig{
-		URL: fmt.Sprintf("%s?%s", requestTokenURL, params.Encode()),
+		Method: requestTokenHTTPMethod,
+		URL:    fmt.Sprintf("%s?%s", requestTokenURL, params.Encode()),
 	}
 
-	_, response, e := service.httpService.HTTPRequest(requestTokenHTTPMethod, &requestConfig)
+	_, response, e := service.httpService.HTTPRequest(&requestConfig)
 	if e != nil {
 		return e
 	}
@@ -74,7 +75,8 @@ func (service *Service) GetAccessToken(r *http.Request) *errortools.Error {
 	params.Set(_OauthVerifier, service.oauthVerifier)
 
 	requestConfig := go_http.RequestConfig{
-		URL: fmt.Sprintf("%s?%s", accessTokenURL, params.Encode()),
+		Method: accessTokenHTTPMethod,
+		URL:    fmt.Sprintf("%s?%s", accessTokenURL, params.Encode()),
 	}
 
 	// use new http service (without OAuth1.0 applied)
@@ -85,7 +87,7 @@ func (service *Service) GetAccessToken(r *http.Request) *errortools.Error {
 		return errortools.ErrorMessage(e.Message())
 	}
 
-	_, response2, e := httpService.HTTPRequest(accessTokenHTTPMethod, &requestConfig)
+	_, response2, e := httpService.HTTPRequest(&requestConfig)
 	if e != nil {
 		return errortools.ErrorMessage(e.Message())
 	}
