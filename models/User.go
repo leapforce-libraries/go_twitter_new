@@ -6,7 +6,7 @@ type User struct {
 	Username        string             `json:"username"`
 	CreatedAt       string             `json:"created_at"`
 	Description     string             `json:"description"`
-	Entities        *[]Entity          `json:"entities"`
+	Entities        *Entities          `json:"entities"`
 	Location        *string            `json:"location"`
 	PinnedTweetID   *string            `json:"pinned_tweet_id"`
 	ProfileImageURL *string            `json:"profile_image_url"`

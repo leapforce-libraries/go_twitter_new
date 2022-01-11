@@ -15,7 +15,7 @@ type Tweet struct {
 	Attachments        *Attachments           `json:"attachments"`
 	Geo                *Geo                   `json:"geo"`
 	ContextAnnotations *[]ContextAnnotation   `json:"context_annotations"`
-	Entities           *[]Entity              `json:"entities"`
+	Entities           *Entities              `json:"entities"`
 	Withheld           *Withheld              `json:"withheld"`
 	PublicMetrics      *TweetPublicMetrics    `json:"public_metrics"`
 	NonPublicMetrics   *TweetNonPublicMetrics `json:"non_public_metrics"`
@@ -68,20 +68,20 @@ type ContextAnnotationEntity struct {
 	Description string `json:"description"`
 }
 
-type Entity struct {
-	Annotations []EntityAnnotation `json:"annotations"`
-	URLs        []EntityURL        `json:"urls"`
-	Hashtags    []EntityHashtag    `json:"hashtags"`
-	Mentions    []EntityMention    `json:"mentions"`
-	Cashtags    []EntityCashtag    `json:"cashtags"`
+type Entities struct {
+	Description EntitiesDescription `json:"description"`
+	URL         EntitiesURL         `json:"url"`
 }
 
-type EntityAnnotation struct {
-	Start          int     `json:"start"`
-	End            int     `json:"end"`
-	Probability    float64 `json:"probability"`
-	Type           string  `json:"type"`
-	NormalizedText string  `json:"normalized_text"`
+type EntitiesURL struct {
+	URLs []EntityURL `json:"urls"`
+}
+
+type EntitiesDescription struct {
+	URLs     []EntityURL     `json:"urls"`
+	Hashtags []EntityHashtag `json:"hashtags"`
+	Mentions []EntityMention `json:"mentions"`
+	Cashtags []EntityCashtag `json:"cashtags"`
 }
 
 type EntityURL struct {
@@ -90,13 +90,12 @@ type EntityURL struct {
 	URL         string `json:"url"`
 	ExpandedURL string `json:"expanded_url"`
 	DisplayURL  string `json:"display_url"`
-	UnwoundURL  string `json:"unwound_url"`
 }
 
 type EntityHashtag struct {
-	Start int    `json:"start"`
-	End   int    `json:"end"`
-	Tag   string `json:"tag"`
+	Start   int    `json:"start"`
+	End     int    `json:"end"`
+	Hashtag string `json:"hashtag"`
 }
 
 type EntityMention struct {
@@ -106,9 +105,9 @@ type EntityMention struct {
 }
 
 type EntityCashtag struct {
-	Start int    `json:"start"`
-	End   int    `json:"end"`
-	Tag   string `json:"tag"`
+	Start   int    `json:"start"`
+	End     int    `json:"end"`
+	Cashtag string `json:"cashtag"`
 }
 
 type Withheld struct {
