@@ -100,6 +100,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dghubble/oauth1 v0.7.0 h1:AlpZdbRiJM4XGHIlQ8BuJ/wlpGwFEJNnB4Mc+78tA/w=
 github.com/dghubble/oauth1 v0.7.0/go.mod h1:8pFdfPkv/jr8mkChVbNVuJ0suiHe278BtWI4Tk1ujxk=
+github.com/dghubble/oauth1 v0.7.1 h1:JjbOVSVVkms9A4h/sTQy5Jb2nFuAAVb2qVYgenJPyrE=
+github.com/dghubble/oauth1 v0.7.1/go.mod h1:0eEzON0UY/OLACQrmnjgJjmvCGXzjBCsZqL1kWDXtF0=
 github.com/dgraph-io/badger v1.6.0/go.mod h1:zwt7syl517jmP8s94KqSxTlM6IMsdhYy6psNgSztDR4=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
@@ -359,6 +361,8 @@ github.com/leapforce-libraries/go_oauth2 v0.0.0-20211007110355-fa8b3b6f9118 h1:1
 github.com/leapforce-libraries/go_oauth2 v0.0.0-20211007110355-fa8b3b6f9118/go.mod h1:KbfdShvVAerXWgSpHGqUvJMQmh0vKu/ONWWI/J57R6M=
 github.com/leapforce-libraries/go_oauth2 v0.0.0-20220102195004-036ca7921103 h1:cyxfETVAw2YyOFEKY2xuDhurr0+PqfA3KoHtTkFfrGU=
 github.com/leapforce-libraries/go_oauth2 v0.0.0-20220102195004-036ca7921103/go.mod h1:EY+80OxzHAhHZbt3zuy3nOqmrmUZ6by/QUXMj6Hd6gU=
+github.com/leapforce-libraries/go_oauth2 v0.0.0-20220131162209-3fde6a5a969b h1:vKjcSNWlWOldZclzzkV24MnUPBQ4PxnCZBXqc7NPXC8=
+github.com/leapforce-libraries/go_oauth2 v0.0.0-20220131162209-3fde6a5a969b/go.mod h1:EY+80OxzHAhHZbt3zuy3nOqmrmUZ6by/QUXMj6Hd6gU=
 github.com/leapforce-libraries/go_ratelimit v0.0.0-20201125093857-b11d8519dd7e h1:TiD7Cswdgv2kFl9yIfT3MJewue8+tZNtBGDUwa4ekJU=
 github.com/leapforce-libraries/go_ratelimit v0.0.0-20201125093857-b11d8519dd7e/go.mod h1:U2gLdAZeBAuU179GpKgTI52J8zaVY1V+sFhLfHh8ONQ=
 github.com/leapforce-libraries/go_ratelimit v0.0.0-20210201164536-d132c1be6d67 h1:Mrgry05VsEPF37Ec+85Gn9MNXkTH1VZzUd0YYZYfteA=
@@ -441,6 +445,7 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=

@@ -46,15 +46,15 @@ const (
 // type
 //
 type Service struct {
-	consumerKey        string
-	basicAuthorization string
-	httpService        *go_http.Service
-	oAuth2Service      *oauth2.Service
-	rateLimitService   *ratelimit.Service
-	oauthToken         string
-	oauthVerifier      string
-	accessToken        string
-	accessSecret       string
+	consumerKey string
+	//basicAuthorization string
+	httpService      *go_http.Service
+	oAuth2Service    *oauth2.Service
+	rateLimitService *ratelimit.Service
+	oauthToken       string
+	oauthVerifier    string
+	accessToken      string
+	accessSecret     string
 }
 
 type ServiceConfigOAuth1 struct {
@@ -139,24 +139,28 @@ func NewServiceOAuth2(serviceConfig ServiceConfigOAuth2) (*Service, *errortools.
 		return nil, errortools.ErrorMessage("ConsumerSecret not provided")
 	}
 
-	service := Service{
-		basicAuthorization: fmt.Sprintf("Basic %s", base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", serviceConfig.ConsumerKey, serviceConfig.ConsumerSecret)))),
-	}
+	basicAuthorization := fmt.Sprintf("Basic %s", base64.URLEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", serviceConfig.ConsumerKey, serviceConfig.ConsumerSecret))))
 
-	tokenFunction := func() (*oauth2.Token, *errortools.Error) {
-		return service.GetOauth2AccessToken()
+	oAuth2ServiceBasic, e := oauth2.NewService(&oauth2.ServiceConfig{})
+	if e != nil {
+		return nil, e
+	}
+	tokenSource, e := NewTokenSource(oAuth2ServiceBasic, basicAuthorization)
+	if e != nil {
+		return nil, e
 	}
 
 	oAuth2ServiceConfig := oauth2.ServiceConfig{
-		NewTokenFunction: &tokenFunction,
+		TokenSource: tokenSource,
 	}
 	oAuth2Service, e := oauth2.NewService(&oAuth2ServiceConfig)
 	if e != nil {
 		return nil, e
 	}
-	service.oAuth2Service = oAuth2Service
 
-	return &service, nil
+	return &Service{
+		oAuth2Service: oAuth2Service,
+	}, nil
 }
 
 // generic Get method
