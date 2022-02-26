@@ -44,12 +44,12 @@ func (ts *TokenSource) NewToken() (*token.Token, *errortools.Error) {
 
 	requestConfig := go_http.RequestConfig{
 		Method:            http.MethodPost,
-		URL:               accessTokenURL2,
+		Url:               accessTokenUrl2,
 		ResponseModel:     &accessToken,
 		NonDefaultHeaders: &header,
 	}
 
-	_, _, e := ts.oAuth2Service.HTTPRequestWithoutAccessToken(&requestConfig)
+	_, _, e := ts.oAuth2Service.HttpRequestWithoutAccessToken(&requestConfig)
 	if e != nil {
 		return nil, e
 	}

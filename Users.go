@@ -116,7 +116,7 @@ func (call *GetUsersCall) Do() (*models.User, *models.Includes, *errortools.Erro
 
 	usersResponse := UsersResponse{}
 	requestConfig := go_http.RequestConfig{
-		URL:           call.service.url(urlPath),
+		Url:           call.service.url(urlPath),
 		ResponseModel: &usersResponse,
 	}
 

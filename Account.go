@@ -16,7 +16,7 @@ func (service *Service) GetAccount() (*Account, *errortools.Error) {
 
 	account := Account{}
 	requestConfig := go_http.RequestConfig{
-		URL:           service.urlV1(urlPath),
+		Url:           service.urlV1(urlPath),
 		ResponseModel: &account,
 	}
 

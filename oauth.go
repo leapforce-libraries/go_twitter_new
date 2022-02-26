@@ -10,17 +10,17 @@ import (
 	go_http "github.com/leapforce-libraries/go_http"
 )
 
-func (service *Service) GetOauthToken(redirectURL string) *errortools.Error {
+func (service *Service) GetOauthToken(redirectUrl string) *errortools.Error {
 	params := url.Values{}
-	params.Set(_OauthCallback, redirectURL)
+	params.Set(_OauthCallback, redirectUrl)
 	params.Set(_OauthConsumerKey, service.consumerKey)
 
 	requestConfig := go_http.RequestConfig{
-		Method: requestTokenHTTPMethod,
-		URL:    fmt.Sprintf("%s?%s", requestTokenURL, params.Encode()),
+		Method: requestTokenHttpMethod,
+		Url:    fmt.Sprintf("%s?%s", requestTokenUrl, params.Encode()),
 	}
 
-	_, response, e := service.httpService.HTTPRequest(&requestConfig)
+	_, response, e := service.httpService.HttpRequest(&requestConfig)
 	if e != nil {
 		return e
 	}
@@ -57,8 +57,8 @@ func (service *Service) GetOauthToken(redirectURL string) *errortools.Error {
 	return nil
 }
 
-func (service *Service) AuthorizeURL() string {
-	return fmt.Sprintf("%s?%s=%s", authorizeURL, _OauthToken, service.oauthToken)
+func (service *Service) AuthorizeUrl() string {
+	return fmt.Sprintf("%s?%s=%s", authorizeUrl, _OauthToken, service.oauthToken)
 }
 
 func (service *Service) GetAccessToken(r *http.Request) *errortools.Error {
@@ -75,19 +75,19 @@ func (service *Service) GetAccessToken(r *http.Request) *errortools.Error {
 	params.Set(_OauthVerifier, service.oauthVerifier)
 
 	requestConfig := go_http.RequestConfig{
-		Method: accessTokenHTTPMethod,
-		URL:    fmt.Sprintf("%s?%s", accessTokenURL, params.Encode()),
+		Method: accessTokenHttpMethod,
+		Url:    fmt.Sprintf("%s?%s", accessTokenUrl, params.Encode()),
 	}
 
 	// use new http service (without OAuth1.0 applied)
 	httpService, e := go_http.NewService(&go_http.ServiceConfig{
-		HTTPClient: &http.Client{},
+		HttpClient: &http.Client{},
 	})
 	if e != nil {
 		return errortools.ErrorMessage(e.Message())
 	}
 
-	_, response2, e := httpService.HTTPRequest(&requestConfig)
+	_, response2, e := httpService.HttpRequest(&requestConfig)
 	if e != nil {
 		return errortools.ErrorMessage(e.Message())
 	}

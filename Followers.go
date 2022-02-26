@@ -123,7 +123,7 @@ func (call *GetFollowersCall) Do() (*[]models.User, *errortools.Error) {
 
 		followersResponse := FollowersResponse{}
 		requestConfig := go_http.RequestConfig{
-			URL:           call.service.url(urlPath),
+			Url:           call.service.url(urlPath),
 			ResponseModel: &followersResponse,
 		}
 

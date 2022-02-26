@@ -22,16 +22,16 @@ import (
 
 const (
 	apiName                string = "Twitter"
-	apiURL                 string = "https://api.twitter.com/2"
-	apiURLv1               string = "https://api.twitter.com/1.1"
-	accessTokenURL2        string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
-	authorizeURL           string = "https://api.twitter.com/oauth/authorize"
-	requestTokenURL        string = "https://api.twitter.com/oauth/request_token"
-	accessTokenURL         string = "https://api.twitter.com/oauth/access_token"
-	requestTokenHTTPMethod string = http.MethodPost
-	accessTokenHTTPMethod  string = http.MethodPost
-	dateLayoutISO8601      string = "2006-01-02T15:04:05Z"
-	redirectURL            string = "http://localhost:8080/oauth/redirect"
+	apiUrl                 string = "https://api.twitter.com/2"
+	apiUrlV1               string = "https://api.twitter.com/1.1"
+	accessTokenUrl2        string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
+	authorizeUrl           string = "https://api.twitter.com/oauth/authorize"
+	requestTokenUrl        string = "https://api.twitter.com/oauth/request_token"
+	accessTokenUrl         string = "https://api.twitter.com/oauth/access_token"
+	requestTokenHttpMethod string = http.MethodPost
+	accessTokenHttpMethod  string = http.MethodPost
+	dateLayoutIso8601      string = "2006-01-02T15:04:05Z"
+	redirectUrl            string = "http://localhost:8080/oauth/redirect"
 )
 
 const (
@@ -108,7 +108,7 @@ func NewServiceOAuth1(serviceConfig *ServiceConfigOAuth1) (*Service, *errortools
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	httpServiceConfig := go_http.ServiceConfig{
-		HTTPClient: httpClient,
+		HttpClient: httpClient,
 	}
 
 	httpService, e := go_http.NewService(&httpServiceConfig)
@@ -170,11 +170,11 @@ func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request
 }
 
 func (service *Service) url(path string) string {
-	return fmt.Sprintf("%s/%s", apiURL, path)
+	return fmt.Sprintf("%s/%s", apiUrl, path)
 }
 
 func (service *Service) urlV1(path string) string {
-	return fmt.Sprintf("%s/%s", apiURLv1, path)
+	return fmt.Sprintf("%s/%s", apiUrlV1, path)
 }
 
 func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
@@ -186,9 +186,9 @@ func (service *Service) httpRequest(httpMethod string, requestConfig *go_http.Re
 	var e *errortools.Error = nil
 
 	if service.httpService != nil {
-		request, response, e = service.httpService.HTTPRequest(requestConfig)
+		request, response, e = service.httpService.HttpRequest(requestConfig)
 	} else {
-		request, response, e = service.oAuth2Service.HTTPRequest(requestConfig)
+		request, response, e = service.oAuth2Service.HttpRequest(requestConfig)
 	}
 
 	if response != nil {
@@ -274,7 +274,7 @@ func (service *Service) urlParams(model interface{}) (*string, *errortools.Error
 		case []string:
 			values.Set(fieldName, strings.Join(v, ","))
 		case time.Time:
-			values.Set(fieldName, v.Format(dateLayoutISO8601))
+			values.Set(fieldName, v.Format(dateLayoutIso8601))
 		}
 	}
 
@@ -292,13 +292,13 @@ func (service *Service) InitToken() *errortools.Error {
 	}
 
 	// STEP 1: Create a request for a consumer application to obtain a request token
-	e := service.GetOauthToken(redirectURL)
+	e := service.GetOauthToken(redirectUrl)
 	if e != nil {
 		return e
 	}
 
 	// STEP 2: Let the user authenticate and send the consumer application a request token
-	fmt.Printf("Go to this url to get new access token:\n\n%s\n\n", service.AuthorizeURL())
+	fmt.Printf("Go to this url to get new access token:\n\n%s\n\n", service.AuthorizeUrl())
 
 	// Create a new redirect route
 	http.HandleFunc("/oauth/redirect", func(w http.ResponseWriter, r *http.Request) {
@@ -311,8 +311,6 @@ func (service *Service) InitToken() *errortools.Error {
 		}
 
 		w.WriteHeader(http.StatusFound)
-
-		return
 	})
 
 	http.ListenAndServe(":8080", nil)
@@ -320,26 +318,26 @@ func (service *Service) InitToken() *errortools.Error {
 	return nil
 }
 
-func (service *Service) APIName() string {
+func (service *Service) ApiName() string {
 	return apiName
 }
 
-func (service *Service) APIKey() string {
+func (service *Service) ApiKey() string {
 	return service.consumerKey
 }
 
-func (service *Service) APICallCount() int64 {
+func (service *Service) ApiCallCount() int64 {
 	if service.httpService != nil {
 		return service.httpService.RequestCount()
 	} else {
-		return service.oAuth2Service.APICallCount()
+		return service.oAuth2Service.ApiCallCount()
 	}
 }
 
-func (service *Service) APIReset() {
+func (service *Service) ApiReset() {
 	if service.httpService != nil {
 		service.httpService.ResetRequestCount()
 	} else {
-		service.oAuth2Service.APIReset()
+		service.oAuth2Service.ApiReset()
 	}
 }

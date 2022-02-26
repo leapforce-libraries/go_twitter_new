@@ -47,9 +47,9 @@ const (
 	MediaFieldDurationMS       MediaField = "duration_ms"
 	MediaFieldHeight           MediaField = "height"
 	MediaFieldMediaKey         MediaField = "media_key"
-	MediaFieldPreviewImageURL  MediaField = "preview_image_url"
+	MediaFieldPreviewImageUrl  MediaField = "preview_image_url"
 	MediaFieldType             MediaField = "type"
-	MediaFieldURL              MediaField = "url"
+	MediaFieldUrl              MediaField = "url"
 	MediaFieldWidth            MediaField = "width"
 	MediaFieldPublicMetrics    MediaField = "public_metrics"
 	MediaFieldNonPublicMetrics MediaField = "non_public_metrics"
@@ -115,10 +115,10 @@ const (
 	UserFieldLocation        UserField = "location"
 	UserFieldName            UserField = "name"
 	UserFieldPinnedTweetID   UserField = "pinned_tweet_id"
-	UserFieldProfileImageURL UserField = "profile_image_url"
+	UserFieldProfileImageUrl UserField = "profile_image_url"
 	UserFieldProtected       UserField = "protected"
 	UserFieldPublicMetrics   UserField = "public_metrics"
-	UserFieldURL             UserField = "url"
+	UserFieldUrl             UserField = "url"
 	UserFieldUsername        UserField = "username"
 	UserFieldVerified        UserField = "verified"
 	UserFieldWithheld        UserField = "withheld"
@@ -432,7 +432,7 @@ func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]strin
 
 		tweetsResponse := TweetsResponse{}
 		requestConfig := go_http.RequestConfig{
-			URL:           call.service.url(urlPath),
+			Url:           call.service.url(urlPath),
 			ResponseModel: &tweetsResponse,
 		}
 
@@ -752,7 +752,7 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]string, *
 
 		tweetsResponse := TweetsResponse{}
 		requestConfig := go_http.RequestConfig{
-			URL:           call.service.url(urlPath),
+			Url:           call.service.url(urlPath),
 			ResponseModel: &tweetsResponse,
 		}
 
