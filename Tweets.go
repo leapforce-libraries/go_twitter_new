@@ -14,7 +14,7 @@ const (
 	maximumNumberOfTweetIDsPerCall int = 100
 )
 
-type TweetsResponse struct {
+type UserTweetsResponse struct {
 	Data     *[]models.Tweet  `json:"data"`
 	Includes *models.Includes `json:"includes"`
 	Meta     *models.Meta     `json:"meta"`
@@ -201,28 +201,6 @@ func (call *GetUserTweetsCall) AddMediaFields(mediaFields ...MediaField) *GetUse
 	return call
 }
 
-/*
-func (call *GetUserTweetsCall) setMediaFields(add bool, mediaFields []MediaField) *GetUserTweetsCall {
-	elems := []string{}
-
-	if (*call).MediaFields != nil && add {
-		elems = *(*call).MediaFields
-	}
-
-	for _, mediaField := range mediaFields {
-		for _, _elem := range elems {
-			if _elem == string(mediaField) {
-				goto next
-			}
-		}
-		elems = append(elems, string(mediaField))
-	next:
-	}
-	(*call).MediaFields = &elems
-
-	return call
-}*/
-
 func (call *GetUserTweetsCall) SetPaginationToken(paginationToken string) *GetUserTweetsCall {
 	(*call).PaginationToken = &paginationToken
 
@@ -247,28 +225,6 @@ func (call *GetUserTweetsCall) AddPlaceFields(placeFields ...PlaceField) *GetUse
 	return call
 }
 
-/*
-func (call *GetUserTweetsCall) setPlaceFields(add bool, placeFields []PlaceField) *GetUserTweetsCall {
-	elems := []string{}
-
-	if (*call).PlaceFields != nil && add {
-		elems = *(*call).PlaceFields
-	}
-
-	for _, placeField := range placeFields {
-		for _, _elem := range elems {
-			if _elem == string(placeField) {
-				goto next
-			}
-		}
-		elems = append(elems, string(placeField))
-	next:
-	}
-	(*call).PlaceFields = &elems
-
-	return call
-}*/
-
 func (call *GetUserTweetsCall) SetPollFields(pollFields ...PollField) *GetUserTweetsCall {
 	if call.PollFields == nil {
 		call.PollFields = &[]string{}
@@ -286,28 +242,6 @@ func (call *GetUserTweetsCall) AddPollFields(pollFields ...PollField) *GetUserTw
 	setPollFields(true, call.PollFields, pollFields)
 	return call
 }
-
-/*
-func (call *GetUserTweetsCall) setPollFields(add bool, pollFields []PollField) *GetUserTweetsCall {
-	elems := []string{}
-
-	if (*call).PollFields != nil && add {
-		elems = *(*call).PollFields
-	}
-
-	for _, pollField := range pollFields {
-		for _, _elem := range elems {
-			if _elem == string(pollField) {
-				goto next
-			}
-		}
-		elems = append(elems, string(pollField))
-	next:
-	}
-	(*call).PollFields = &elems
-
-	return call
-}*/
 
 func (call *GetUserTweetsCall) SetSinceID(sinceID string) *GetUserTweetsCall {
 	(*call).SinceID = &sinceID
@@ -339,28 +273,6 @@ func (call *GetUserTweetsCall) AddTweetFields(tweetFields ...TweetField) *GetUse
 	return call
 }
 
-/*
-func (call *GetUserTweetsCall) setTweetFields(add bool, tweetFields []TweetField) *GetUserTweetsCall {
-	elems := []string{}
-
-	if (*call).TweetFields != nil && add {
-		elems = *(*call).TweetFields
-	}
-
-	for _, tweetField := range tweetFields {
-		for _, _elem := range elems {
-			if _elem == string(tweetField) {
-				goto next
-			}
-		}
-		elems = append(elems, string(tweetField))
-	next:
-	}
-	(*call).TweetFields = &elems
-
-	return call
-}*/
-
 func (call *GetUserTweetsCall) SetUntilID(untilID string) *GetUserTweetsCall {
 	(*call).UntilID = &untilID
 
@@ -385,28 +297,6 @@ func (call *GetUserTweetsCall) AddUserFields(userFields ...UserField) *GetUserTw
 	return call
 }
 
-/*
-func (call *GetUserTweetsCall) setUserFields(add bool, userFields []UserField) *GetUserTweetsCall {
-	elems := []string{}
-
-	if (*call).UserFields != nil && add {
-		elems = *(*call).UserFields
-	}
-
-	for _, userField := range userFields {
-		for _, _elem := range elems {
-			if _elem == string(userField) {
-				goto next
-			}
-		}
-		elems = append(elems, string(userField))
-	next:
-	}
-	(*call).UserFields = &elems
-
-	return call
-}*/
-
 func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]string, *errortools.Error) {
 	tweets := []models.Tweet{}
 	includes := models.Includes{
@@ -430,7 +320,7 @@ func (call *GetUserTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]strin
 		urlPath := fmt.Sprintf("users/%s/tweets%s", call.userID, *params)
 		//fmt.Println(call.service.url(urlPath))
 
-		tweetsResponse := TweetsResponse{}
+		tweetsResponse := UserTweetsResponse{}
 		requestConfig := go_http.RequestConfig{
 			Url:           call.service.url(urlPath),
 			ResponseModel: &tweetsResponse,
@@ -750,7 +640,7 @@ func (call *GetTweetsCall) Do() (*[]models.Tweet, *models.Includes, *[]string, *
 		urlPath := fmt.Sprintf("tweets%s", *params)
 		//fmt.Println(call.service.url(urlPath))
 
-		tweetsResponse := TweetsResponse{}
+		tweetsResponse := UserTweetsResponse{}
 		requestConfig := go_http.RequestConfig{
 			Url:           call.service.url(urlPath),
 			ResponseModel: &tweetsResponse,
