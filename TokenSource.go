@@ -72,3 +72,7 @@ func (ts *TokenSource) RetrieveToken() *errortools.Error {
 func (ts *TokenSource) SaveToken() *errortools.Error {
 	return nil
 }
+
+func (ts *TokenSource) UnmarshalToken(b []byte) (*token.Token, *errortools.Error) {
+	return nil, nil
+}
