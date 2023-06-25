@@ -57,7 +57,7 @@ func (service *Service) GetOauthToken(redirectUrl string) *errortools.Error {
 	return nil
 }
 
-func (service *Service) AuthorizeUrl() string {
+func (service *Service) AuthorizeUrl1() string {
 	return fmt.Sprintf("%s?%s=%s", authorizeUrl, _OauthToken, service.oauthToken)
 }
 

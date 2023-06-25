@@ -44,7 +44,6 @@ const (
 )
 
 // type
-//
 type Service struct {
 	consumerKey string
 	//basicAuthorization string
@@ -164,7 +163,6 @@ func NewServiceOAuth2(serviceConfig ServiceConfigOAuth2) (*Service, *errortools.
 }
 
 // generic Get method
-//
 func (service *Service) get(requestConfig *go_http.RequestConfig) (*http.Request, *http.Response, *errortools.Error) {
 	return service.httpRequest(http.MethodGet, requestConfig)
 }
@@ -298,7 +296,7 @@ func (service *Service) InitToken() *errortools.Error {
 	}
 
 	// STEP 2: Let the user authenticate and send the consumer application a request token
-	fmt.Printf("Go to this url to get new access token:\n\n%s\n\n", service.AuthorizeUrl())
+	fmt.Printf("Go to this url to get new access token:\n\n%s\n\n", service.AuthorizeUrl1())
 
 	// Create a new redirect route
 	http.HandleFunc("/oauth/redirect", func(w http.ResponseWriter, r *http.Request) {
