@@ -52,6 +52,7 @@ type Service2ConfigOAuth1 struct {
 }
 
 type Service2ConfigOAuth2 struct {
+	ConsumerKey  string
 	ClientId     string
 	ClientSecret string
 	TokenSource  tokensource.TokenSource
@@ -100,6 +101,7 @@ func NewService2OAuth2(serviceConfig *Service2ConfigOAuth2) (*Service2, *errorto
 	}
 
 	var service = Service2{
+		consumerKey:  serviceConfig.ConsumerKey,
 		clientId:     serviceConfig.ClientId,
 		clientSecret: serviceConfig.ClientSecret,
 		redirectUrl:  &redirectUrl,

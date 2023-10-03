@@ -16,6 +16,7 @@ import (
 	errortools "github.com/leapforce-libraries/go_errortools"
 	go_http "github.com/leapforce-libraries/go_http"
 	oauth2 "github.com/leapforce-libraries/go_oauth2"
+	tokenfixed "github.com/leapforce-libraries/go_oauth2/tokenfixed"
 	ratelimit "github.com/leapforce-libraries/go_ratelimit"
 	utilities "github.com/leapforce-libraries/go_utilities"
 )
@@ -25,10 +26,10 @@ const (
 	apiUrl                 string = "https://api.twitter.com/2"
 	apiUrlV1               string = "https://api.twitter.com/1.1"
 	accessTokenUrl2        string = "https://api.twitter.com/oauth2/token?grant_type=client_credentials"
-	authorizeUrl           string = "https://api.twitter.com/oauth/authorize"
+	authorizeUrl           string = "https://api.twitter.com/2/oauth2/authorize"
 	requestTokenUrl        string = "https://api.twitter.com/oauth/request_token"
 	accessTokenUrl         string = "https://api.twitter.com/oauth/access_token"
-	requestTokenHttpMethod string = http.MethodPost
+	requestTokenHttpMethod string = http.MethodGet
 	accessTokenHttpMethod  string = http.MethodPost
 	dateLayoutIso8601      string = "2006-01-02T15:04:05Z"
 	redirectUrl            string = "http://localhost:8080/oauth/redirect"
@@ -159,6 +160,41 @@ func NewServiceOAuth2(serviceConfig ServiceConfigOAuth2) (*Service, *errortools.
 
 	return &Service{
 		oAuth2Service: oAuth2Service,
+	}, nil
+}
+
+type ServiceConfigBearerToken struct {
+	Token string
+}
+
+func NewServiceBearerToken(serviceConfig ServiceConfigBearerToken) (*Service, *errortools.Error) {
+	if serviceConfig.Token == "" {
+		return nil, errortools.ErrorMessage("Token not provided")
+	}
+
+	tokenSource, e := tokenfixed.NewTokenFixed(serviceConfig.Token)
+	if e != nil {
+		return nil, e
+	}
+
+	oAuth2ServiceConfig := oauth2.ServiceConfig{
+		TokenSource: tokenSource,
+	}
+	oAuth2Service, e := oauth2.NewService(&oAuth2ServiceConfig)
+	if e != nil {
+		return nil, e
+	}
+
+	headerRemaining := "x-rate-limit-remaining"
+	headerReset := "x-rate-limit-reset"
+	rateLimitServiceConfig := ratelimit.ServiceConfig{
+		HeaderRemaining: &headerRemaining,
+		HeaderReset:     &headerReset,
+	}
+
+	return &Service{
+		oAuth2Service:    oAuth2Service,
+		rateLimitService: ratelimit.NewService(&rateLimitServiceConfig),
 	}, nil
 }
 
